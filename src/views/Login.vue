@@ -56,7 +56,7 @@
         let self = this;
         console.log("Login succeeded");
 
-        this.$store.commit("login");
+        this.$store.commit("login", req.data.result);
 
         self.error = undefined;
         self.user = req.data.result;
@@ -100,6 +100,7 @@
 
     .logo {
       width: 100%;
+      padding: 0 12px 20px 0;
       text-align: center;
       img {
         width: 200px;

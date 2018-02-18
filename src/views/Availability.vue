@@ -1,6 +1,6 @@
 <template>
   <div><div class="container is-fluid">
-    <h1 class="title">Appointments</h1>
+    <h1 class="title">Availability</h1>
   </div>
   </div>
 </template>

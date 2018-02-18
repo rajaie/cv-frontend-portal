@@ -1,7 +1,6 @@
 <template>
-  <div><div class="container is-fluid">
-    <h1 class="title">Appointments</h1>
-  </div>
+  <div>
+    <h1 class="title">Intake Forms</h1>
   </div>
 </template>
 

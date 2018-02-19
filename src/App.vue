@@ -57,7 +57,8 @@
         min-height: 100vh;
       }
       .top-bar {
-        .navbar-burger {
+        .navbar {
+          border-bottom: 1px solid #e0e0e0;
         }
         a.navbar-item:hover, a.navbar-item.is-active, a.navbar-link:hover, a.navbar-link.is-active {
           background: none;

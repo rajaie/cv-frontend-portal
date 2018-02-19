@@ -1,5 +1,4 @@
 <template>
-    <div>
       <div class="top-bar">
         <div class="navbar is-fixed-top">
           <div class="navbar-brand">
@@ -43,7 +42,6 @@
           </div>
         </div>
       </div>
-    </div>
 </template>
 
 <script>

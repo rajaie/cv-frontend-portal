@@ -21,8 +21,7 @@
             </li>
           </ul>
         </div>
-        <div class="column is-6" v-if="selectedService">
-          <div class="edit-column">
+        <div class="column edit-column is-6" v-if="selectedService">
             <div class="service-header">
               <h2 class="left-align subtitle">{{selectedService.name}}</h2>
               <span v-if="selectedServiceId !== null" class="right-align has-text-danger delete-button"
@@ -95,7 +94,6 @@
                 {{ errors }}
               </div>
             </div><!-- /div.edit-form -->
-          </div>
         </div><!-- /div.edit-column -->
         <div class="column is-2" v-if="selectedServiceId !== null">
           <h2 class="subtitle has-text-centered">Offered By</h2>
@@ -142,7 +140,7 @@
           }
         }
 
-        return []
+        return [] // default
       },
 
       selectedServiceId() {
@@ -150,7 +148,7 @@
           return this.selectedService.id
         }
 
-        return null;
+        return null; // default
       },
     },
     created() {
@@ -162,7 +160,8 @@
         if (service === null) {
           // Creating a new service, initialize form values here
           service = {
-            enabled: true
+            enabled: true,
+            name: "New Service"
           }
         }
         this.selectedService = Object.assign({}, service)
@@ -210,6 +209,11 @@
           const serviceIdx = this.services.findIndex(s => s.id === serviceId);
           this.services.splice(serviceIdx, 1)
           this.selectedService = null
+          this.$toast.open({
+            message: 'Service deleted successfully',
+            type: 'is-danger',
+            duration: 1500
+          })
         }
         catch (err) {
           console.log(err)
@@ -230,7 +234,7 @@
           self.$toast.open({
             message: 'Practitioner link updated successfully!',
             type: 'is-success',
-            duration: 1000
+            duration: 1500
           })
         }).catch(err => {
           console.log(err)
@@ -239,7 +243,7 @@
       async createService() {
         console.log("Creating service")
         let self = this;
-        let newService = Object.assign({}, this.selectedService);
+         newService = Object.assign({}, this.selectedService);
 
         try {
           const res = await ApiService({
@@ -281,7 +285,7 @@
           self.$toast.open({
             message: 'Service updated successfully!',
             type: 'is-success',
-            duration: 1000
+            duration: 1500
           })
           self.errors = null
         }).catch(err => {
@@ -296,10 +300,10 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
   .container {
+    padding-top: 20px;
     .main-columns {
       margin-bottom: 0;
     }
-    padding-top: 20px;
     .delete-button:hover {
       cursor: pointer;
     }
@@ -321,10 +325,13 @@
     }
     div.edit-column {
       .edit-form {
-        border: 1px solid rgba(205, 226, 224, 0.53);
+        background: #f7f7f7;
         padding: 1rem;
-        border-radius: 16px;
       }
+      h2.subtitle {
+        margin-bottom: .5rem
+      }
+
     }
   }
 </style>

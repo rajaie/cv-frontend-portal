@@ -154,6 +154,7 @@
   // TODO: for the new appointment date picker, set unselectable-days-of-week (https://buefy.github.io/#/documentation/datepicker) to the days where the practitioner is not working
   // TODO: allow booking appointments for another practitioner
   // TODO: allow rescheduling for appointment. Right now practitioner must delete appt then re-create the new one.
+  // TODO: add button near Patient search box to allow creating a new patient
 
   export default {
     name: 'Appointments',

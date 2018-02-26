@@ -23,7 +23,7 @@
         </div>
         <div class="field has-text-centered appointment-buttons">
           <a @click="cancelAppointment(selectedAppointment)" class="button is-danger">
-            Cancel
+            Cancel Booking
           </a>
         </div>
       </div>

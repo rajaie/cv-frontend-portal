@@ -30,8 +30,10 @@
       </div>
       <div v-if="selectedInvoice" class="column is-two-fifths invoice-column">
         <h1 class="title">INVOICE</h1>
-        <div>{{selectedInvoice.createdAtMoment.format("MMM DD, YYYY")}}</div>
-        <div class="has-text-right">
+        <div class="right-align">Invoice #{{selectedInvoice.id}}</div>
+        <div class="left-align">{{selectedInvoice.createdAtMoment.format("MMM DD, YYYY")}}</div>
+        <div class="clear"></div>
+        <div class="has-text-centered">
           <div>{{clinic.name}}</div>
           <div>{{clinic.address}}</div>
           <div>{{clinic.officeNumber}}</div>

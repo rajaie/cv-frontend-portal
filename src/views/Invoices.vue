@@ -39,7 +39,7 @@
           <div>{{clinic.officeNumber}}</div>
           <div>{{clinic.email}}</div>
         </div>
-        <div><strong>Billed To:</strong> {{selectedInvoice.appointment.patientName}}</div>
+        <div><strong>Bill To:</strong> {{selectedInvoice.appointment.patientName}}</div>
         <div><strong>Item:</strong> {{selectedInvoice.appointment.duration}} minutes {{selectedInvoice.appointment.serviceName}}</div>
         <div><strong>Price:</strong> ${{selectedInvoice.total}}</div>
         <div><strong>Practitioner:</strong> {{selectedInvoice.appointment.practitionerName}}</div>

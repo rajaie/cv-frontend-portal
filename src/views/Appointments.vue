@@ -8,8 +8,16 @@
     </h1>
     <div class="columns is-desktop">
       <div class="column">
-        <full-calendar ref="calendar" :event-sources="appointments" :header="calendarOptions.header" :config="calendarOptions.config"></full-calendar>
+        <full-calendar ref="calendar"
+                       :event-sources="eventSources"
+                       :header="calendarOptions.header"
+                       :config="calendarOptions.config">
+        </full-calendar>
       </div>
+
+      <!-- **********************************************************
+           *************** APPOINTMENT DETAILS SECTION **************
+           ********************************************************** -->
       <div v-if="selectedAppointment" class="column is-2">
         <h2 class="subtitle left-align">Appointment Details</h2>
         <a @click="selectedAppointment=undefined" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
@@ -22,9 +30,20 @@
           <p><span class="appointment-field">Practitioner:</span>  {{selectedAppointment.practitionerName}}</p>
         </div>
         <div class="field has-text-centered appointment-buttons">
-          <a @click="cancelAppointment(selectedAppointment)" class="button is-danger">
+          <button v-if="!selectedAppointment.invoice || !selectedAppointment.invoice.length" @click="createInvoice(selectedAppointment)" class="button is-primary">
+            Create Invoice
+          </button>
+          <button @click="cancelAppointment(selectedAppointment)" class="button is-danger">
             Cancel Booking
-          </a>
+          </button>
+        </div>
+        <div class="invoice-details" v-if="selectedAppointment.invoice && selectedAppointment.invoice.length">
+          <h2 class="subtitle">Invoice Details</h2>
+          <div>
+            <p><span class="appointment-field">Invoice No:</span> #{{selectedAppointment.invoice[0].id}}</p>
+            <p><span class="appointment-field">Total:</span> ${{selectedAppointment.invoice[0].total}}</p>
+            <p><span class="appointment-field">Billed To:</span> {{selectedAppointment.patientName}}</p>
+          </div>
         </div>
       </div>
       <div v-if="serviceBooking" class="column is-2">
@@ -57,6 +76,7 @@
                     v-model="serviceBooking.date"
                     :min-date="datePickerOptions.minDate"
                     :date-formatter="datePickerOptions.dateFormatter"
+                    :first-day-of-week=1
                     position="is-bottom-left">
                   </b-datepicker>
                 </b-field>
@@ -118,6 +138,7 @@
                 v-model="breakBooking.date"
                 :min-date="datePickerOptions.minDate"
                 :date-formatter="datePickerOptions.dateFormatter"
+                :first-day-of-week=1
                 position="is-bottom-left">
               </b-datepicker>
             </b-field>
@@ -258,10 +279,10 @@
           }
         }
       },
-      appointments() {
+      eventSources() {
         let self = this;
 
-        const appointmentSources = [
+        const eventSources = [
           {
             events(start, end, timezone, callback) {
               start =  start.format("YYYY-MM-DD HH:mm:ss");
@@ -269,7 +290,7 @@
 
               ApiService.get('/appointment', {
                   params: {
-                    populate: "false",
+                    // populate: false,
                     where: {
                       startDateTime: {
                         '>=': start
@@ -295,14 +316,12 @@
                       start: moment.tz(appointment.startDateTime, appointment.timezone).format(),
                       end: moment.tz(appointment.endDateTime, appointment.timezone).format()
                     }
-                    console.log(event.start)
-                    console.log(event.end)
 
                     appointment.startDateTime = moment.tz(appointment.startDateTime, appointment.timezone),
                     appointment.endDateTime = moment.tz(appointment.endDateTime, appointment.timezone);
                     event = Object.assign(event, appointment)
 
-                    if (self.$store.state.auth.user.id !== appointment.practitioner) {
+                    if (self.$store.state.auth.user.id !== appointment.practitioner.id) {
                       event.color = '#d7d7d7';
                     }
                     formattedAppts.push(event)
@@ -314,7 +333,7 @@
           }
         ]
 
-        return appointmentSources
+        return eventSources
       }
     },
     created() {
@@ -422,6 +441,27 @@
           console.log(reason);
         })
       },
+      async createInvoice(appointment) {
+        const invoiceParams = {
+          appointmentId: this.selectedAppointment.id
+        }
+        try {
+          const res = await ApiService.post("/invoice", invoiceParams, {})
+          const invoice = res.data.result;
+          this.$toast.open({
+            message: res.data.message,
+            type: 'is-success',
+            duration: 2000
+          })
+          console.log(invoice)
+          this.selectedAppointment.invoice = [invoice]
+          this.selectedAppointment = Object.assign({}, this.selectedAppointment)
+          this.$refs.calendar.$emit('refetch-events')
+        }
+        catch (e) {
+          console.log(e)
+        }
+      },
       async createAppointment(appointment) {
         // TODO: send email notification to patient & practitioner
         let self = this;
@@ -448,9 +488,7 @@
           patientId: self.serviceBooking.patient.id
         };
 
-        ApiService.post(`/appointment`, bodyParams, {
-          withCredentials: true
-        }).then(function (response) {
+        ApiService.post(`/appointment`, bodyParams).then(function (response) {
           console.log(response.data.message);
           self.serviceBooking = null
 
@@ -549,6 +587,9 @@
   }
   .appointment-buttons {
     margin-top: 1rem;
+    button {
+      margin-bottom: .3rem;
+    }
   }
   .service-booking {
     margin-bottom: 1.5rem;

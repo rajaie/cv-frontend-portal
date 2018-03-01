@@ -17,13 +17,13 @@
           </thead>
           <tbody>
           <tr v-for="invoice in invoices" @click="selectInvoice(invoice)" class="invoice-row">
-            <th>#{{invoice.id}}</th>
-            <th>{{invoice.createdAtMoment.format("YYYY-MM-DD")}}</th>
-            <th>{{invoice.appointment.practitionerName}}</th>
-            <th>{{invoice.appointment.serviceName}}</th>
-            <th>{{invoice.appointment.duration}} mins</th>
-            <th>{{invoice.appointment.patientName}}</th>
-            <th>${{invoice.total}}</th>
+            <th class="has-text-centered">#{{invoice.id}}</th>
+            <td>{{invoice.createdAtMoment.format("YYYY-MM-DD")}}</td>
+            <td>{{invoice.appointment.practitionerName}}</td>
+            <td>{{invoice.appointment.serviceName}}</td>
+            <td>{{invoice.appointment.duration}} mins</td>
+            <td>{{invoice.appointment.patientName}}</td>
+            <td>${{invoice.total}}</td>
           </tr>
           </tbody>
         </table>

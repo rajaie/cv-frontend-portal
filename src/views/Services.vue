@@ -184,16 +184,36 @@
       getServices() {
         let self = this;
         ApiService.get('/service', {
-          withCredentials: true
+          withCredentials: true,
+          params: {
+            populateWhereQuery: {
+              'practitioners': {
+                where: {
+                  deleted: false
+                },
+              },
+            },
+            sort: 'id ASC',
+          },
         }).then(res => self.services = res.data.result)
           .catch(err => console.log(err))
       },
       getPractitioners() {
         let self = this;
         ApiService.get('/user', {
-          withCredentials: true
-        }).then(res => self.practitioners = res.data.result)
-          .catch(err => console.log(err))
+            params: {
+              where: {
+                deleted: false,
+              },
+              sort: 'id ASC',
+            },
+            withCredentials:true
+          }
+        ).then(function(response) {
+          self.practitioners = response.data.result
+          console.log("res.data.result = " + JSON.stringify(response.data.result));
+        }
+        ).catch(err => console.log(err));
       },
       async deleteService(serviceId) {
         const confirmDelete = confirm("Are you sure you want to delete this service?");

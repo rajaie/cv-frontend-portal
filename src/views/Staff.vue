@@ -33,7 +33,7 @@
                       <b-input v-model="selectedUser.role" disabled></b-input>
                     </b-field>
                     <b-field label="Username">
-                      <b-input v-model="selectedUser.username"></b-input>
+                      <b-input v-model="selectedUser.username" disabled></b-input>
                     </b-field>
                     <b-field label="First Name">
                       <b-input v-model="selectedUser.firstName"></b-input>

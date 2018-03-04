@@ -97,12 +97,12 @@
             </div><!-- /div.edit-form -->
           </div>
         </div><!-- /div.edit-column -->
-        <div class="column is-2" v-if="selectedServiceId !== null">
-          <h2 class="subtitle has-text-centered">Offered By</h2>
-          <ul class="has-text-centered">
+        <div class="column is-2 practitioner-select" v-if="selectedServiceId !== null">
+          <h2 class="subtitle">Offered By</h2>
+          <ul class="service-practioners">
             <li v-for="p in practitioners">
               <div class="field">
-                <div class="control has-text-centered">
+                <div class="control ">
                   <label class="checkbox" @click.prevent="practitionerLinkHandler(p.id, selectedService.id)">
                     <input type="checkbox" :value="p.id" v-model="offeringPractitioners">
                     {{p.firstName}} {{p.lastName}}
@@ -345,6 +345,9 @@
         padding: 1rem;
         border-radius: 16px;
       }
+    }
+    div.practitioner-select {
+      padding-left: 2rem;
     }
   }
 </style>

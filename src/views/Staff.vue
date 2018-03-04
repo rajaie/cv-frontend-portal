@@ -80,6 +80,7 @@
 <script>
   //TODO: paginate list of staff
   //TODO: allow to search staff by name, id and other criteria
+  //TODO: better error messaging when creating user/ for example inform user when the username doesn't exist etc.
   import ApiService from '@/services/ApiService'
 
   export default {

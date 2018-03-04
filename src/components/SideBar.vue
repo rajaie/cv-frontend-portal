@@ -30,7 +30,7 @@
   #app {
     .wrapper {
       .side-bar {
-        background: #cae8fb;
+        background: #5dc0ff;
         height: 100%;
         display: flex;
         flex-flow: column nowrap;
@@ -40,11 +40,20 @@
           span.menu-item-right {
             margin-left: 10px;
           }
-          .menu-list a {
-            padding: 0.75em 1.75em;
-            &.is-active {
-              color: black;
-              background: white;
+          .menu-list {
+            li {
+              :hover {
+                color: black;
+              }
+              a {
+                color: white;
+                padding: 0.75em 1.75em;
+                border-radius: 0;
+                &.is-active {
+                  color: black;
+                  background: white;
+                }
+              }
             }
           }
         }

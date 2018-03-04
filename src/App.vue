@@ -30,6 +30,7 @@
   import 'buefy/lib/buefy.css'
 
   Vue.use(Buefy)
+  window.jQuery = window.$ = require('jquery')
 
   export default {
     name: 'App',
@@ -65,7 +66,7 @@
         }
       }
       .main-container {
-        background: #fbfbfb;
+        background: #ffffff;
         height: 100%;
       }
     }

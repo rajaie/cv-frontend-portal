@@ -8,7 +8,7 @@ This repo is for the frontend of the app that authenticated practitioners and st
 
 We use several libraries and frameworks for our front-end, the more important ones are:
 
-1. [Vue.js](https://vuejs.org/) - UI interface framework
+1. [Vue.js](https://vuejs.org/) - UI framework
 1. [vue-router](https://router.vuejs.org/en/) - Browser navigation plugin for Vue.js
 1. [vuex](https://vuex.vuejs.org/en/intro.html) - State management library for Vue.js
 1. [Bulma](https://bulma.io/) - CSS framework for styling

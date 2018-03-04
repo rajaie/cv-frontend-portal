@@ -1,7 +1,11 @@
 <template>
   <div>
     <div class="container is-fluid">
-      <h1 class="title">Staff</h1>
+      <h1 class="title">Staff
+      <a @click="createUser" title='Create a new user'>
+        <button class="fas fa-plus-circle fa-xs"></button>
+      </a>
+      </h1>
       <div class="columns main-columns">
         <div class="column is-3">
           <ul class="user-list" >
@@ -26,7 +30,9 @@
                 <div class="user-edit-form">
                   <ul class="user-edit-list">
                     <li>Username:<br> <input type="text" name="username" v-model="selectedUser.username" disabled=true><br></li>
-                    <li>Role:<br> <input type="text" name="role" v-model="selectedUser.role" disabled=true><br></li>
+                    <li>Role:<br> <select disabled=true>
+                      <option :value="selectedUser.role">practitioner</option>
+                    </select>
                     <li>First Name:<br> <input type="text" name="first-name" v-model="selectedUser.firstName"></li>
                     <li>Last Name:<br> <input type="text" name="last-name" v-model="selectedUser.lastName"></li>
                     <li>Email:<br> <input type="email" name="email" v-model="selectedUser.email"></li>
@@ -34,6 +40,33 @@
                   </ul>
                   <button type="submit" name="save" @click="submitUserUpdate()" v-show="selectedUser" class="button is-link">Save</button>
                   <button type="reset" name="cancel" @click="undoUserUpdate" v-show="selectedUser" class="button is-text">Cancel</button><br>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="newUser" class="column is-4">
+          <div class="add-column">
+            <div class="user-info">
+              <div class="user-edit">
+                <div class="edit-user-header">
+                  <h2 class="left-align subtitle">Create New User</h2>
+                </div>
+                <div class="clear"></div>
+                <div class="user-edit-form">
+                  <ul class="user-edit-list">
+                    <li>Username:<br> <input type="text" name="username" v-model="newUser.username"><br></li>
+                    <li>Password:<br> <input type="password" name="password" v-model="newUser.password"><br></li>
+                    <li>Role:<br> <select>
+                      <option value="practitioner">practitioner</option>
+                    </select>
+                    <li>First Name:<br> <input type="text" name="first-name" v-model="newUser.firstName"></li>
+                    <li>Last Name:<br> <input type="text" name="last-name" v-model="newUser.lastName"></li>
+                    <li>Email:<br> <input type="email" name="email" v-model="newUser.email"></li>
+                    <li>Mobile Number:<br> <input type="tel" name="mobile-number" v-model="newUser.mobileNumber"></li>
+                  </ul>
+                  <button type="submit" name="save" @click="submitNewUser" v-show="newUser" class="button is-link">Save</button>
+                  <button type="reset" name="cancel" @click="undoNewUser" v-show="newUser" class="button is-text">Cancel</button><br>
                 </div>
               </div>
             </div>
@@ -55,6 +88,7 @@
       return {
         userList : [],
         selectedUser : null,
+        newUser : null,
       }
     },
     computed: {
@@ -87,6 +121,7 @@
       selectUser(userId) {
         const user = this.userList.find(u => u.id === userId)
         console.log('userId last selected = ' + user.id)
+        this.newUser = null;
         this.selectedUser = user;
       },
       submitUserUpdate() {
@@ -158,7 +193,46 @@
           self.getUserProfiles();
           self.selectedUser = null;
         });
-      }
+      },
+      submitNewUser() {
+        let self = this;
+        const userInfo = {
+          username: this.newUser.username,
+          password: this.newUser.password,
+          email: this.newUser.email,
+          mobileNumber: this.newUser.mobileNumber,
+          firstName: this.newUser.firstName,
+          lastName: this.newUser.lastName,
+          role: this.newUser.role,
+        };
+        ApiService.post(
+          '/user/',
+          userInfo,
+          {withCredentials: true,}
+        ).then(function(response) {
+          self.$toast.open({
+            message: 'New user created successfully',
+            type: 'is-success',
+            duration: 2000
+          });
+          console.log("newUser is " + JSON.stringify(self.newUser));
+          self.getUserProfiles();
+          self.selectedUser = null;
+        }).catch(function (err) {
+          self.$toast.open({
+            message: 'Unable to create new user',
+            type: 'is-danger',
+            duration: 2000
+          });
+        });
+      },
+      undoNewUser() {
+        this.newUser = null;
+      },
+      createUser() {
+        this.selectedUser = null;
+        this.newUser = {};
+      },
     }
   }
 </script>

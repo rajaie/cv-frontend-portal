@@ -2,7 +2,7 @@
   <div>
     <div class="container is-fluid">
       <h1 class="title">Staff
-      <a @click="createUser" title='Create a new user'>
+      <a @click="createUserTemplate" title='Create a new user'>
         <button class="fas fa-plus-circle fa-xs"></button>
       </a>
       </h1>
@@ -11,7 +11,7 @@
           <ul class="user-list" >
             <li v-for="user in userList" class="user">
               <span @click="selectUser(user.id)" class="user-name">
-                {{user.username}} ({{user.firstName}}, {{user.lastName}}) <div class="fas fa-edit"></div>
+                {{user.firstName}} {{user.lastName}} ({{user.username}})  <div class="fas fa-edit"></div>
               </span>
             </li>
           </ul>
@@ -28,16 +28,26 @@
                 </div>
                 <div class="clear"></div>
                 <div class="user-edit-form">
-                  <ul class="user-edit-list">
-                    <li>Username:<br> <input type="text" name="username" v-model="selectedUser.username" disabled=true><br></li>
-                    <li>Role:<br> <select disabled=true>
-                      <option :value="selectedUser.role">practitioner</option>
-                    </select>
-                    <li>First Name:<br> <input type="text" name="first-name" v-model="selectedUser.firstName"></li>
-                    <li>Last Name:<br> <input type="text" name="last-name" v-model="selectedUser.lastName"></li>
-                    <li>Email:<br> <input type="email" name="email" v-model="selectedUser.email"></li>
-                    <li>Mobile Number:<br> <input type="tel" name="mobile-number" v-model="selectedUser.mobileNumber"></li>
-                  </ul>
+                  <div class="user-form-data">
+                    <b-field label="Role">
+                      <b-input v-model="selectedUser.role" disabled></b-input>
+                    </b-field>
+                    <b-field label="Username">
+                      <b-input v-model="selectedUser.username"></b-input>
+                    </b-field>
+                    <b-field label="First Name">
+                      <b-input v-model="selectedUser.firstName"></b-input>
+                    </b-field>
+                    <b-field label="Last Name">
+                      <b-input v-model="selectedUser.lastName"></b-input>
+                    </b-field>
+                    <b-field label="Email">
+                      <b-input v-model="selectedUser.email" placeholder="Email" type="email"></b-input>
+                    </b-field>
+                    <b-field label="Mobile Number">
+                      <b-input v-model="selectedUser.mobileNumber"></b-input>
+                    </b-field>
+                  </div>
                   <button type="submit" name="save" @click="submitUserUpdate()" v-show="selectedUser" class="button is-link">Save</button>
                   <button type="reset" name="cancel" @click="undoUserUpdate" v-show="selectedUser" class="button is-text">Cancel</button><br>
                 </div>
@@ -54,17 +64,27 @@
                 </div>
                 <div class="clear"></div>
                 <div class="user-edit-form">
-                  <ul class="user-edit-list">
-                    <li>Username:<br> <input type="text" name="username" v-model="newUser.username"><br></li>
-                    <li>Password:<br> <input type="password" name="password" v-model="newUser.password"><br></li>
-                    <li>Role:<br> <select>
-                      <option value="practitioner">practitioner</option>
-                    </select>
-                    <li>First Name:<br> <input type="text" name="first-name" v-model="newUser.firstName"></li>
-                    <li>Last Name:<br> <input type="text" name="last-name" v-model="newUser.lastName"></li>
-                    <li>Email:<br> <input type="email" name="email" v-model="newUser.email"></li>
-                    <li>Mobile Number:<br> <input type="tel" name="mobile-number" v-model="newUser.mobileNumber"></li>
-                  </ul>
+                  <b-field label="Role">
+                    <b-input v-model="newUser.role" disabled></b-input>
+                  </b-field>
+                  <b-field label="Username">
+                    <b-input v-model="newUser.username"></b-input>
+                  </b-field>
+                  <b-field label="Password">
+                    <b-input type="password" password-reveal v-model="newUser.password"></b-input>
+                  </b-field>
+                  <b-field label="First Name">
+                    <b-input v-model="newUser.firstName"></b-input>
+                  </b-field>
+                  <b-field label="Last Name">
+                    <b-input v-model="newUser.lastName"></b-input>
+                  </b-field>
+                  <b-field label="Email">
+                    <b-input v-model="newUser.email" placeholder="Email" type="email"></b-input>
+                  </b-field>
+                  <b-field label="Mobile Number">
+                    <b-input v-model="newUser.mobileNumber"></b-input>
+                  </b-field>
                   <button type="submit" name="save" @click="submitNewUser" v-show="newUser" class="button is-link">Save</button>
                   <button type="reset" name="cancel" @click="undoNewUser" v-show="newUser" class="button is-text">Cancel</button><br>
                 </div>
@@ -81,6 +101,7 @@
   //TODO: paginate list of staff
   //TODO: allow to search staff by name, id and other criteria
   //TODO: better error messaging when creating user/ for example inform user when the username doesn't exist etc.
+  //TODO: convert role to be a dropdown option instead of a text option
   import ApiService from '@/services/ApiService'
 
   export default {
@@ -93,8 +114,8 @@
       }
     },
     computed: {
-      selectedUserStr() {
-        JSON.stringify(this.selectedUser);
+      fullName() {
+        firstName + " " + lastName;
       },
     },
     created() {
@@ -115,13 +136,11 @@
             withCredentials:true
           }
         ).then(function(response) {
-          console.log("getting profiles for this clinic :" + JSON.stringify(response.data.result));
           self.userList = response.data.result;
         }).catch(err => console.log(err));
       },
       selectUser(userId) {
         const user = this.userList.find(u => u.id === userId)
-        console.log('userId last selected = ' + user.id)
         this.newUser = null;
         this.selectedUser = user;
       },
@@ -216,9 +235,8 @@
             type: 'is-success',
             duration: 2000
           });
-          console.log("newUser is " + JSON.stringify(self.newUser));
           self.getUserProfiles();
-          self.selectedUser = null;
+          self.newUser = null;
         }).catch(function (err) {
           self.$toast.open({
             message: 'Unable to create new user',
@@ -230,9 +248,10 @@
       undoNewUser() {
         this.newUser = null;
       },
-      createUser() {
+      createUserTemplate() {
         this.selectedUser = null;
-        this.newUser = {};
+        // initialize the new user, set the default value of the role to be practitioner
+        this.newUser = {'role' : 'practitioner'};
       },
     }
   }
@@ -259,12 +278,13 @@
       border: 1px solid rgba(205, 226, 224, 0.53);
       padding: 1rem;
       border-radius: 16px;
-      ul.user-edit-list {
-        li {
-          padding-bottom: 0.75rem;
-          font-weight: bold;
-        }
-      }
+    }
+    div.user-form-data {
+      margin-bottom: 2rem;
+    }
+    div.edit-user-header{
+      margin-bottom: 4rem;
+      font-weight: bold;
     }
   }
 </style>

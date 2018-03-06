@@ -30,9 +30,9 @@
           <div class="has-text-info">Appointment Details</div>
           <div><strong>Start:</strong> {{formatDateTime(selectedSoapNote.appointment.startDateTime, selectedSoapNote.appointment.timezone)}}</div>
           <div><strong>End:</strong> {{formatDateTime(selectedSoapNote.appointment.endDateTime, selectedSoapNote.appointment.timezone)}}</div>
-          <div><strong>Service:</strong> {{selectedSoapNote.appointment.serviceName}}</strong></div>
-          <div><strong>Patient:</strong> {{selectedSoapNote.appointment.patientName}}</strong></div>
-          <div><strong>Practitioner:</strong> {{selectedSoapNote.appointment.practitionerName}}</strong></div>
+          <div><strong>Service:</strong> {{selectedSoapNote.appointment.serviceName}}</div>
+          <div><strong>Patient:</strong> {{selectedSoapNote.appointment.patientName}}</div>
+          <div><strong>Practitioner:</strong> {{selectedSoapNote.appointment.practitionerName}}</div>
         </div>
         <b-tabs type="is-boxed">
           <b-tab-item v-for="(section, index) in Object.keys(selectedSoapNote.notes.sections)"

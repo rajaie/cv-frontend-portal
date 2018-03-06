@@ -37,6 +37,8 @@
 <script>
   import ApiService from '@/services/ApiService'
 
+  // TODO: Grab Clinic object when user logs in and store it in localStorage
+
 
   export default {
     name: 'Login',

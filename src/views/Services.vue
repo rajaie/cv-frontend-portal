@@ -185,7 +185,7 @@
         ApiService.get('/service', {
           withCredentials: true,
           params: {
-            populateWhereQuery: {
+            populateSubcriteria: {
               'practitioners': {
                 where: {
                   deleted: false

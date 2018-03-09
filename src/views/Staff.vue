@@ -21,7 +21,7 @@
             <div class="user-info">
               <div class="user-edit">
                 <div class="edit-user-header">
-                  <h2 class="left-align subtitle">{{selectedUser.firstName}} {{selectedUser.lastName}}</h2>
+                  <h2 class="left-align subtitle">{{selectedUser.first tName}} {{selectedUser.lastName}}</h2>
                   <span class="right-align has-text-danger delete-button" @click="deleteUser(selectedUser.id)">
                     <i class="fas fa-minus-circle"></i>
                   </span>
@@ -45,11 +45,11 @@
                       <b-input v-model="selectedUser.email" placeholder="Email" type="email"></b-input>
                     </b-field>
                     <b-field label="Mobile Number">
-                      <b-input v-model="selectedUser.mobileNumber"></b-input>
+                      <b-input v-model="selectedUser.mobileNumber" type="tel"></b-input>
                     </b-field>
                   </div>
-                  <button type="submit" name="save" @click="submitUserUpdate()" v-show="selectedUser" class="button is-link">Save</button>
-                  <button type="reset" name="cancel" @click="undoUserUpdate" v-show="selectedUser" class="button is-text">Cancel</button><br>
+                  <button type="submit" name="save" @click="submitUserUpdate" class="button is-link">Save</button>
+                  <button type="reset" name="cancel" @click="undoUserUpdate" class="button is-text">Cancel</button><br>
                 </div>
               </div>
             </div>
@@ -71,7 +71,10 @@
                     <b-input v-model="newUser.username"></b-input>
                   </b-field>
                   <b-field label="Password">
-                    <b-input type="password" password-reveal v-model="newUser.password"></b-input>
+                    <b-input type="password" password-reveal v-model="newUser.password" v-on:keyup.native="comparePasswords"></b-input>
+                  </b-field>
+                  <b-field label="Confirm Password" :type="passwordsMatch?'':'is-danger'" :message="passwordsMatch?'':'Passwords must match'">
+                    <b-input type="password" password-reveal v-model="newUser.passwordConfirmation" v-on:keyup.native="comparePasswords"></b-input>
                   </b-field>
                   <b-field label="First Name">
                     <b-input v-model="newUser.firstName"></b-input>
@@ -83,10 +86,10 @@
                     <b-input v-model="newUser.email" placeholder="Email" type="email"></b-input>
                   </b-field>
                   <b-field label="Mobile Number">
-                    <b-input v-model="newUser.mobileNumber"></b-input>
+                    <b-input v-model="newUser.mobileNumber" type="tel"></b-input>
                   </b-field>
-                  <button type="submit" name="save" @click="submitNewUser" v-show="newUser" class="button is-link">Save</button>
-                  <button type="reset" name="cancel" @click="undoNewUser" v-show="newUser" class="button is-text">Cancel</button><br>
+                  <button type="submit" name="save" @click="submitNewUser" class="button is-link">Save</button>
+                  <button type="reset" name="cancel" @click="undoNewUser" class="button is-text">Cancel</button><br>
                 </div>
               </div>
             </div>
@@ -111,12 +114,10 @@
         userList : [],
         selectedUser : null,
         newUser : null,
+        passwordsMatch : true,
       }
     },
     computed: {
-      fullName() {
-        firstName + " " + lastName;
-      },
     },
     created() {
       this.getUserProfiles();
@@ -137,12 +138,15 @@
           }
         ).then(function(response) {
           self.userList = response.data.result;
-        }).catch(err => console.log(err));
+          console.log("self.userList1 = " + JSON.stringify(self.userList));
+        }).catch(function(err) {
+          console.log(err);
+        });
       },
       selectUser(userId) {
         const user = this.userList.find(u => u.id === userId)
         this.newUser = null;
-        this.selectedUser = user;
+        this.selectedUser = Object.assign({},user);
       },
       submitUserUpdate() {
         let self = this;
@@ -165,8 +169,10 @@
           if (self.$store.state.auth.user.id === self.selectedUser.id) {
             self.$store.commit("login", response.data.result[0]);
           }
+          console.log("getting profiles");
+          self.getUserProfiles();
         }).catch(function (err) {
-          console.log("Error is:" + JSON.stringify(err));
+          console.log("Error is:" + err);
           self.$toast.open({
             message: 'Unable to update profile',
             type: 'is-danger',
@@ -216,6 +222,14 @@
       },
       submitNewUser() {
         let self = this;
+        if (this.newUser.password !== this.newUser.passwordConfirmation) {
+          self.$toast.open({
+            message: 'Passwords must match to new create user',
+            type: 'is-danger',
+            duration: 2000
+          });
+          return;
+        }
         const userInfo = {
           username: this.newUser.username,
           password: this.newUser.password,
@@ -253,6 +267,15 @@
         // initialize the new user, set the default value of the role to be practitioner
         this.newUser = {'role' : 'practitioner'};
       },
+      comparePasswords() {
+        console.log("comparing passwords");
+        if (this.newUser.password === this.newUser.passwordConfirmation) {
+          this.passwordsMatch = true;
+        }
+        else {
+          this.passwordsMatch = false;
+        }
+      }
     }
   }
 </script>
@@ -285,6 +308,9 @@
     div.edit-user-header{
       margin-bottom: 4rem;
       font-weight: bold;
+    }
+    span.delete-button:hover {
+      cursor: pointer;
     }
   }
 </style>

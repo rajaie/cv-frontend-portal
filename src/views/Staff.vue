@@ -21,7 +21,7 @@
             <div class="user-info">
               <div class="user-edit">
                 <div class="edit-user-header">
-                  <h2 class="left-align subtitle">{{selectedUser.first tName}} {{selectedUser.lastName}}</h2>
+                  <h2 class="left-align subtitle">{{selectedUser.firstName}} {{selectedUser.lastName}}</h2>
                   <span class="right-align has-text-danger delete-button" @click="deleteUser(selectedUser.id)">
                     <i class="fas fa-minus-circle"></i>
                   </span>

@@ -33,7 +33,9 @@ To view the site on your mobile, you will need to follow several steps:
 1. Get your mobile's local IP address for the wifi network (this will look something like 192.168.x.x). You can find this in your phone's settings.
 1. Update your Ubuntu firewall to allow access to your machine  from your mobile's IP to the port the site is running on. The command will be something like `sudo ufw allow from 192.168.1.104 to any port 8081`. Make sure you replace the IP with your mobile's IP, and the port with the port the site is running on.
 
-### Production Build
+## Production Deploy
+
+### Build
 ``` bash
 # build for production with minification
 npm run build
@@ -41,6 +43,12 @@ npm run build
 # build for production and view the bundle analyzer report
 npm run build --report
 ```
+
+### Deploy Process
+
+Just run the deploy script in the `scripts/` directory: `./deploy.sh`. This will build the website files and then copy them to the S3 bucket. 
+
+Your AWS credentials must be configured (in `~/.aws/credentials`) for this step to work, you must also have the AWS CLI installed. See the [cv-infrastructure](https://github.com/rajaie/cv-infrastructure) repo for more information.
 
 ## Troubleshooting
 

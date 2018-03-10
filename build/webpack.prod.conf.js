@@ -31,7 +31,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
       'process.env': env,
-      'API_HOST_PORT': JSON.stringify('http://api.myclinicview.com:80')
+      '__API_HOST_PORT__': JSON.stringify('http://api.myclinicview.com:80')
     }),
     new UglifyJsPlugin({
       uglifyOptions: {

@@ -4,7 +4,7 @@
       <h1 class="title">
         Profile
         <a @click="enableEditView" title='Edit Profile'>
-          <button class="fas fa-edit"></button>
+          <button class="fas fa-edit fa-xs"></button>
         </a>
       </h1>
       <div class="columns main-columns">

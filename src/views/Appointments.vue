@@ -6,7 +6,7 @@
         <button class="fas fa-plus-circle fa-xs"></button>
       </a>
     </h1>
-    <div class="columns is-desktop">
+    <div class="columns is-multiline">
       <div class="column">
         <full-calendar ref="calendar"
                        :event-sources="eventSources"
@@ -14,11 +14,32 @@
                        :config="calendarOptions.config">
         </full-calendar>
       </div>
-
+      <!-- **********************************************************
+           ******************* SOAP NOTES SECTION *******************
+           ********************************************************** -->
+      <div v-if="selectedAppointment && selectedAppointment.soapNotes && selectedAppointment.soapNotes.length"
+           class="column is-4-widescreen is-full-touch is-full-desktop soap-note">
+        <h2 class="subtitle">SOAP Note</h2>
+        <b-tabs type="is-boxed">
+          <b-tab-item v-for="(section, index) in Object.keys(selectedAppointment.soapNotes[0].notes.sections)"
+                      :key="index"
+                      :label="section">
+            <div class="field">
+              <div class="control">
+                <textarea class="textarea"
+                          v-model="selectedAppointment.soapNotes[0].notes.sections[section]"
+                          placeholder="Notes..."></textarea>
+                <button @click="updateSoapNote(selectedAppointment.soapNotes[0])"
+                        class="button is-info save">Save</button>
+              </div>
+            </div>
+          </b-tab-item>
+        </b-tabs>
+      </div>
       <!-- **********************************************************
            *************** APPOINTMENT DETAILS SECTION **************
            ********************************************************** -->
-      <div v-if="selectedAppointment" class="column is-2">
+      <div v-if="selectedAppointment" class="column is-2-widescreen is-full-touch is-full-desktop">
         <h2 class="subtitle left-align">Appointment Details</h2>
         <a @click="selectedAppointment=undefined" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
         <div class="clear"></div>
@@ -33,7 +54,10 @@
           <button v-if="!selectedAppointment.invoice || !selectedAppointment.invoice.length" @click="createInvoice(selectedAppointment)" class="button is-primary">
             Create Invoice
           </button>
-          <button @click="cancelAppointment(selectedAppointment)" class="button is-danger">
+          <button v-if="!selectedAppointment.soapNotes || !selectedAppointment.soapNotes.length" @click="createSoapNote(selectedAppointment)" class="button is-primary">
+            Create SOAP Note
+          </button>
+          <button v-if="selectedAppointment.isBookingCancellable" @click="cancelAppointment(selectedAppointment)" class="button is-danger">
             Cancel Booking
           </button>
         </div>
@@ -176,6 +200,8 @@
   // TODO: allow booking appointments for another practitioner
   // TODO: allow rescheduling for appointment. Right now practitioner must delete appt then re-create the new one.
   // TODO: add button near Patient search box to allow creating a new patient
+  // TODO: add button to delete SOAP note
+  // TODO: hide appointment cancellation button if an invoice or SOAP note has been created for that appointment, since trying to delete the appt will cause a foreign key error on the backend
 
   export default {
     name: 'Appointments',
@@ -187,6 +213,7 @@
       return {
         services: null,
         patients: null,
+        soapNoteTemplate: null,
         serviceBooking: null,
         breakBooking: {
           duration: null,
@@ -220,6 +247,7 @@
             minTime: '07:00:00',
             maxTime: '20:00:00',
             // Callbacks
+            // event handler for when an appointment is clicked in the calendar
             eventClick(event, jsEvent, view) {
               let aptCpy = Object.assign({}, event);
               delete aptCpy.source // get rid of this, causes a circular reference error when trying to JSON.stringify
@@ -290,7 +318,6 @@
 
               ApiService.get('/appointment', {
                   params: {
-                    // populate: false,
                     where: {
                       startDateTime: {
                         '>=': start
@@ -319,6 +346,9 @@
 
                     appointment.startDateTime = moment.tz(appointment.startDateTime, appointment.timezone),
                     appointment.endDateTime = moment.tz(appointment.endDateTime, appointment.timezone);
+                    appointment.isBookingCancellable = moment.tz(appointment.startDateTime, appointment.timezone)
+                      .isAfter(moment.tz(appointment.timezone))
+
                     event = Object.assign(event, appointment)
 
                     if (self.$store.state.auth.user.id !== appointment.practitioner.id) {
@@ -339,6 +369,7 @@
     created() {
       this.getServices()
       this.getPatients()
+      this.getSoapNoteTemplates()
     },
     watch: {
       'serviceBooking.date': function (newDate, oldDate) {
@@ -367,6 +398,35 @@
         this.serviceBooking.service = service
         if (this.serviceBooking.date) {
           this.findEmptySlots(moment(this.serviceBooking.date).format('YYYY-MM-DD'));
+        }
+      },
+      async updateSoapNote(soapNote) {
+        const bodyParams = {
+          notes: JSON.stringify(soapNote.notes)
+        }
+        try {
+          const res = await ApiService.patch(`/soapNotes/${soapNote.id}`, bodyParams)
+          const note = res.data.result;
+          this.$toast.open({
+            message: res.data.message,
+            type: 'is-success',
+            duration: 2000
+          })
+          console.log(note)
+          this.$refs.calendar.$emit('refetch-events')
+        }
+        catch (e) {
+          console.log(e)
+        }
+      },
+      async getSoapNoteTemplates() {
+        try {
+          const soapNoteTemplate = await ApiService.get('/soapNoteTemplate')
+          this.soapNoteTemplate = soapNoteTemplate.data.result[0].template
+          console.log(soapNoteTemplate.data.message)
+        }
+        catch (e) {
+          console.log(e.data.message);
         }
       },
       getServices() {
@@ -455,6 +515,33 @@
           })
           console.log(invoice)
           this.selectedAppointment.invoice = [invoice]
+          this.selectedAppointment = Object.assign({}, this.selectedAppointment)
+          this.$refs.calendar.$emit('refetch-events')
+        }
+        catch (e) {
+          console.log(e)
+        }
+      },
+      async createSoapNote(appointment) {
+        let soapNoteObj = this.soapNoteTemplate.sections.reduce(function(acc, cur, i) {
+          acc['sections'][cur] = "";
+          return acc;
+        }, {'sections': {}});
+        console.log(soapNoteObj);
+        const noteParams = {
+          appointmentId: this.selectedAppointment.id,
+          notes: JSON.stringify(soapNoteObj)
+        }
+        try {
+          const res = await ApiService.post("/soapNotes", noteParams)
+          const note = res.data.result;
+          this.$toast.open({
+            message: res.data.message,
+            type: 'is-success',
+            duration: 2000
+          })
+          console.log(note)
+          this.selectedAppointment.soapNotes = [note]
           this.selectedAppointment = Object.assign({}, this.selectedAppointment)
           this.$refs.calendar.$emit('refetch-events')
         }
@@ -593,6 +680,11 @@
   }
   .service-booking {
     margin-bottom: 1.5rem;
+  }
+  div .soap-note {
+    button.save {
+      margin-top: 1rem;
+    }
   }
 </style>
 

@@ -5,26 +5,28 @@
       <div class="column invoice-list">
         <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
           <thead>
-          <tr>
-            <th><abbr title="Invoice Number">No.</abbr></th>
-            <th>Date</th>
-            <th>Practitioner</th>
-            <th>Service</th>
-            <th>Duration</th>
-            <th>Patient</th>
-            <th>Total</th>
-          </tr>
+            <tr>
+              <th><abbr title="Invoice Number">No.</abbr></th>
+              <th>Date</th>
+              <th>Practitioner</th>
+              <th>Service</th>
+              <th>Duration</th>
+              <th>Patient</th>
+              <th>Total</th>
+            </tr>
           </thead>
           <tbody>
-          <tr v-for="invoice in invoices" @click="selectInvoice(invoice)" class="invoice-row">
-            <th class="has-text-centered">#{{invoice.id}}</th>
-            <td>{{invoice.createdAtMoment.format("YYYY-MM-DD")}}</td>
-            <td>{{invoice.appointment.practitionerName}}</td>
-            <td>{{invoice.appointment.serviceName}}</td>
-            <td>{{invoice.appointment.duration}} mins</td>
-            <td>{{invoice.appointment.patientName}}</td>
-            <td>${{invoice.total}}</td>
-          </tr>
+            <tr v-for="invoice in invoices"
+                @click="selectInvoice(invoice)"
+                :class="['invoice-row', { 'is-selected': isRowSelected(invoice.id) }]">
+              <th class="has-text-centered">#{{invoice.id}}</th>
+              <td>{{invoice.createdAtMoment.format("YYYY-MM-DD")}}</td>
+              <td>{{invoice.appointment.practitionerName}}</td>
+              <td>{{invoice.appointment.serviceName}}</td>
+              <td>{{invoice.appointment.duration}} mins</td>
+              <td>{{invoice.appointment.patientName}}</td>
+              <td>${{invoice.total}}</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -76,6 +78,13 @@
       this.getClinic();
     },
     methods: {
+      isRowSelected(rowId) {
+        if (!this.selectedInvoice) {
+          return false
+        }
+
+        return rowId === this.selectedInvoice.id
+      },
       selectInvoice(invoice) {
         this.selectedInvoice = invoice
       },
@@ -112,11 +121,6 @@
 <style lang="scss" scoped>
   .container {
     padding-top: 20px;
-    .invoice-row {
-      &:hover {
-        cursor: pointer;
-      }
-    }
     .invoice-column {
       border: 1px solid black;
       h1.title {
@@ -124,8 +128,18 @@
       }
     }
     table {
+      tr.invoice-row {
+        &:hover {
+          cursor: pointer;
+        }
+      }
       thead {
         th {
+          text-align: center;
+        }
+      }
+      tbody {
+        td, th {
           text-align: center;
         }
       }

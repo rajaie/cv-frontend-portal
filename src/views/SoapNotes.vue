@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container is-fluid">
     <h1 class="title">SOAP Notes</h1>
   </div>
 </template>
@@ -8,7 +8,7 @@
   import ApiService from '@/services/ApiService'
 
   export default {
-    name: 'Appointments',
+    name: 'SoapNotes',
     data() {
       return {
       }
@@ -24,4 +24,7 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
+  .container {
+    padding-top: 20px;
+  }
 </style>

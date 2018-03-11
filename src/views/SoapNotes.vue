@@ -25,9 +25,15 @@
         </table>
       </div>
       <div v-if="selectedSoapNote" class="column is-two-fifths soapNote-column">
-        <h2 class="subtitle">SOAP Note</h2>
-        <div class="has-text-right appointment-info">
-          <div class="has-text-info">Appointment Details</div>
+        <h2 class="subtitle left-align">SOAP Note</h2>
+        <div class="right-align">
+          <a @click="selectedSoapNote=undefined;">
+            <button class="fas fa-chevron-circle-right"></button>
+          </a>
+        </div>
+        <div class="clear"></div>
+        <div class="has-text-centered appointment-info">
+          <div class="has-text-grey-dark is-size-5">Appointment Details</div>
           <div><strong>Start:</strong> {{formatDateTime(selectedSoapNote.appointment.startDateTime, selectedSoapNote.appointment.timezone)}}</div>
           <div><strong>End:</strong> {{formatDateTime(selectedSoapNote.appointment.endDateTime, selectedSoapNote.appointment.timezone)}}</div>
           <div><strong>Service:</strong> {{selectedSoapNote.appointment.serviceName}}</strong></div>
@@ -88,6 +94,7 @@
         try {
           const soapNotes = await ApiService.get('/soapNotes')
           this.soapNotes = soapNotes.data.result
+          this.soapNotes = this.soapNotes.filter(note => note.appointment !== null)
           console.log(soapNotes.data.message)
         }
         catch (e) {
@@ -98,9 +105,8 @@
         return moment.tz(dateTime, timezone).format("ddd, MMM Do, hh:mm A")
       },
       async updateSoapNote(soapNote) {
-        let soapNoteObj = soapNote
         const bodyParams = {
-          notes: JSON.stringify(soapNoteObj.notes)
+          notes: JSON.stringify(soapNote.notes)
         }
         try {
           const res = await ApiService.patch(`/soapNotes/${soapNote.id}`, bodyParams)

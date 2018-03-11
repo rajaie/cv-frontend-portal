@@ -6,7 +6,7 @@
         <button class="fas fa-plus-circle fa-xs"></button>
       </a>
     </h1>
-    <div class="columns is-desktop">
+    <div class="columns is-multiline">
       <div class="column">
         <full-calendar ref="calendar"
                        :event-sources="eventSources"
@@ -18,7 +18,7 @@
            ******************* SOAP NOTES SECTION *******************
            ********************************************************** -->
       <div v-if="selectedAppointment && selectedAppointment.soapNotes && selectedAppointment.soapNotes.length"
-           class="column is-4 soap-note">
+           class="column is-4-widescreen is-full-touch is-full-desktop soap-note">
         <h2 class="subtitle">SOAP Note</h2>
         <b-tabs type="is-boxed">
           <b-tab-item v-for="(section, index) in Object.keys(selectedAppointment.soapNotes[0].notes.sections)"
@@ -39,7 +39,7 @@
       <!-- **********************************************************
            *************** APPOINTMENT DETAILS SECTION **************
            ********************************************************** -->
-      <div v-if="selectedAppointment" class="column is-2">
+      <div v-if="selectedAppointment" class="column is-2-widescreen is-full-touch is-full-desktop">
         <h2 class="subtitle left-align">Appointment Details</h2>
         <a @click="selectedAppointment=undefined" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
         <div class="clear"></div>
@@ -200,6 +200,8 @@
   // TODO: allow booking appointments for another practitioner
   // TODO: allow rescheduling for appointment. Right now practitioner must delete appt then re-create the new one.
   // TODO: add button near Patient search box to allow creating a new patient
+  // TODO: add button to delete SOAP note
+  // TODO: hide appointment cancellation button if an invoice or SOAP note has been created for that appointment, since trying to delete the appt will cause a foreign key error on the backend
 
   export default {
     name: 'Appointments',
@@ -316,7 +318,6 @@
 
               ApiService.get('/appointment', {
                   params: {
-                    // populate: false,
                     where: {
                       startDateTime: {
                         '>=': start
@@ -350,7 +351,7 @@
 
                     event = Object.assign(event, appointment)
 
-                    if (self.$store.state.auth.user.id !== appointment.practitioner.id) {
+                    if (self.$store.state.auth.user.id !== appointment.practitioner) {
                       event.color = '#d7d7d7';
                     }
                     formattedAppts.push(event)
@@ -400,9 +401,8 @@
         }
       },
       async updateSoapNote(soapNote) {
-        let soapNoteObj = soapNote
         const bodyParams = {
-          notes: JSON.stringify(soapNoteObj.notes)
+          notes: JSON.stringify(soapNote.notes)
         }
         try {
           const res = await ApiService.patch(`/soapNotes/${soapNote.id}`, bodyParams)

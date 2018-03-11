@@ -351,7 +351,7 @@
 
                     event = Object.assign(event, appointment)
 
-                    if (self.$store.state.auth.user.id !== appointment.practitioner) {
+                    if (self.$store.state.auth.user.id !== appointment.practitioner.id) {
                       event.color = '#d7d7d7';
                     }
                     formattedAppts.push(event)

@@ -42,7 +42,7 @@
     name: 'Login',
     data() {
       return {
-        password: "qq",
+        password: "",
         username: "practitioner_1_0",
         user: undefined,
         patients: undefined,

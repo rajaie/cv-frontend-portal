@@ -42,7 +42,7 @@
           <div>{{clinic.email}}</div>
         </div>
         <div><strong>Bill To:</strong> {{selectedInvoice.appointment.patientName}}</div>
-        <div><strong>Item:</strong> {{selectedInvoice.appointment.duration}} minutes {{selectedInvoice.appointment.serviceName}}</div>
+        <div><strong>Item:</strong> {{selectedInvoice.appointment.duration}} minutes {{selectedInvoice.appointment.serviceName}} on {{selectedInvoice.appointmentDateTimeMoment.format("MMM DD, YYYY")}}</div>
         <div><strong>Price:</strong> ${{selectedInvoice.total}}</div>
         <div><strong>Practitioner:</strong> {{selectedInvoice.appointment.practitionerName}}</div>
       </div>
@@ -94,6 +94,7 @@
           this.invoices = invoices.data.result
           this.invoices.forEach(function(i) {
             i.createdAtMoment = moment.tz(i.createdAt, i.appointment.timezone)
+            i.appointmentDateTimeMoment = moment.tz(i.startDateTime, i.appointment.timezone)
             i.appointment.duration = moment(i.appointment.endDateTime).diff(i.appointment.startDateTime, 'minutes')
           })
           console.log(this.invoices)

@@ -95,12 +95,12 @@
               </div>
             </div><!-- /div.edit-form -->
         </div><!-- /div.edit-column -->
-        <div class="column is-2" v-if="selectedServiceId !== null">
-          <h2 class="subtitle has-text-centered">Offered By</h2>
-          <ul class="has-text-centered">
+        <div class="column is-2 practitioner-select" v-if="selectedServiceId !== null">
+          <h2 class="subtitle">Offered By</h2>
+          <ul class="service-practioners">
             <li v-for="p in practitioners">
               <div class="field">
-                <div class="control has-text-centered">
+                <div class="control ">
                   <label class="checkbox" @click.prevent="practitionerLinkHandler(p.id, selectedService.id)">
                     <input type="checkbox" :value="p.id" v-model="offeringPractitioners">
                     {{p.firstName}} {{p.lastName}}
@@ -183,16 +183,36 @@
       getServices() {
         let self = this;
         ApiService.get('/service', {
-          withCredentials: true
+          withCredentials: true,
+          params: {
+            populateSubcriteria: {
+              'practitioners': {
+                where: {
+                  deleted: false
+                },
+              },
+            },
+            sort: 'id ASC',
+          },
         }).then(res => self.services = res.data.result)
           .catch(err => console.log(err))
       },
       getPractitioners() {
         let self = this;
         ApiService.get('/user', {
-          withCredentials: true
-        }).then(res => self.practitioners = res.data.result)
-          .catch(err => console.log(err))
+            params: {
+              where: {
+                deleted: false,
+              },
+              sort: 'id ASC',
+            },
+            withCredentials:true
+          }
+        ).then(function(response) {
+          self.practitioners = response.data.result
+          console.log("res.data.result = " + JSON.stringify(response.data.result));
+        }
+        ).catch(err => console.log(err));
       },
       async deleteService(serviceId) {
         const confirmDelete = confirm("Are you sure you want to delete this service?");
@@ -332,6 +352,9 @@
         margin-bottom: .5rem
       }
 
+    }
+    div.practitioner-select {
+      padding-left: 2rem;
     }
   }
 </style>

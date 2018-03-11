@@ -1,3 +1,3 @@
 export default {
-  apiEndpoint: "http://0.0.0.0:1337"
+  apiEndpoint: __API_HOST_PORT__ // Defined in /build/webpack.*.conf.js
 }

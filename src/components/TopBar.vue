@@ -60,10 +60,14 @@
       let self = this;
 
       function checkLogin() {
+        // TODO: use interceptor instead of this ghetto method
         ApiService.get('/user/authenticated').then()
           .catch(function (err) {
-            self.$store.commit("logout");
-            self.$router.replace('/')
+            console.log(err.response)
+            if (err.response && err.response.status === 403) {
+              self.$store.commit("logout");
+              self.$router.replace('/')
+            }
         })
       }
 

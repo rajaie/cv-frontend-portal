@@ -138,7 +138,6 @@
           }
         ).then(function(response) {
           self.userList = response.data.result;
-          console.log("self.userList1 = " + JSON.stringify(self.userList));
         }).catch(function(err) {
           console.log(err);
         });

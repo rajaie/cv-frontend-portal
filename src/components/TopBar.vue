@@ -56,6 +56,22 @@
         mainMenuLinks: mainMenuLinks
       }
     },
+    created() {
+      let self = this;
+
+      function checkLogin() {
+        ApiService.get('/user/authenticated').then()
+          .catch(function (err) {
+            self.$store.commit("logout");
+            self.$router.replace('/')
+        })
+      }
+
+      // Check if the user is still logged in.
+      // Do this on each page load, and once/minute.
+      checkLogin()
+      setInterval(checkLogin, 60000)
+    },
     methods: {
       makeBurger() {
         this.burgerIsActive = !this.burgerIsActive;
@@ -66,14 +82,12 @@
         const confirmedLogout = confirm("Are you sure you want to log out?");
 
         if (confirmedLogout) {
-          ApiService.post('/logout', {}, {
-            withCredentials: true
-          }).then(function (res) {
+          ApiService.post('/logout')
+            .then(function (res) {
             self.$store.commit("logout");
             self.$router.replace('/')
             console.log(res)
-          })
-            .catch(function (err) {
+          }).catch(function (err) {
               console.log(err)
 
             })

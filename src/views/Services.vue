@@ -210,7 +210,6 @@
           }
         ).then(function(response) {
           self.practitioners = response.data.result
-          console.log("res.data.result = " + JSON.stringify(response.data.result));
         }
         ).catch(err => console.log(err));
       },

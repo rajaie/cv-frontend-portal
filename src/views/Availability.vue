@@ -185,13 +185,11 @@
             self.setAvailabilities(self.availabilityData);
             console.log(self.practitionerAvailability);
           })
-          .catch(function (reason) {
-            console.log(reason);
+          .catch(function (error) {
+            console.log(error);
           })
       },
       undoChanges() {
-        console.log('undoing changes');
-        console.log(this.practitionerAvailability);
         this.setAvailabilities(this.availabilityData);
       },
       submitChanges() {
@@ -211,7 +209,6 @@
         const addBody = {
           availabilities: toAdd
         };
-        console.log('to add');
         ApiService.post('/availability', addBody,
           { withCredentials: true,}
         ).then(function (response) {

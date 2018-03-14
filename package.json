@@ -17,6 +17,7 @@
     "vue": "^2.5.2",
     "vue-full-calendar": "^2.5.2",
     "vue-router": "^3.0.1",
+    "vue2-timepicker": "git+https://github.com/xxRockOnxx/vue2-timepicker.git",
     "vuex": "^3.0.1"
   },
   "devDependencies": {

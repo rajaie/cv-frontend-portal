@@ -50,134 +50,51 @@
     },
     methods: {
       initAvailabitilties() {
-        return [
-          {
-            dayNumber : 1,
-            day : 'Monday',
-            start : {
-              mm:'',
-              hh:'',
-              A:'',
-            },
-            end : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            enabled : false,
+        const defaultAvailabilityObj = {
+          start : {
+            hh:'',
+            mm:'',
+            A:'',
           },
-          {
-            dayNumber : 2,
-            day : 'Tuesday',
-            start : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            end : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            enabled : false,
+          end : {
+            hh:'',
+            mm:'',
+            A:'',
           },
-          {
-            dayNumber : 3,
-            day : 'Wednesday',
-            start : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            end : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            enabled : false,
-          },
-          {
-            dayNumber : 4,
-            day : 'Thursday',
-            start : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            end : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            enabled : false,
-          },
-          {
-            dayNumber : 5,
-            day : 'Friday',
-            start : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            end : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            enabled : false,
-          },
-          {
-            dayNumber : 6,
-            day : 'Saturday',
-            start : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            end : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            enabled : false,
-          },
-          {
-            dayNumber : 7,
-            day : 'Sunday',
-            start : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            end : {
-              hh:'',
-              mm:'',
-              A:'',
-            },
-            enabled : false,
-          },
-        ];
+          enabled : false,
+        };
+
+        var avails = [];
+        avails.push(Object.assign(_.cloneDeep(defaultAvailabilityObj), {dayNumber : 1, day : 'Monday'}));
+        avails.push(Object.assign(_.cloneDeep(defaultAvailabilityObj), {dayNumber : 2, day : 'Tuesday'}));
+        avails.push(Object.assign(_.cloneDeep(defaultAvailabilityObj), {dayNumber : 3, day : 'Wednesday'}));
+        avails.push(Object.assign(_.cloneDeep(defaultAvailabilityObj), {dayNumber : 4, day : 'Thursday'}));
+        avails.push(Object.assign(_.cloneDeep(defaultAvailabilityObj), {dayNumber : 5, day : 'Friday'}));
+        avails.push(Object.assign(_.cloneDeep(defaultAvailabilityObj), {dayNumber : 6, day : 'Saturday'}));
+        avails.push(Object.assign(_.cloneDeep(defaultAvailabilityObj), {dayNumber : 7, day : 'Sunday'}));
+
+        return avails;
       },
-      setAvailabilities(data) {
+      setAvailabilities(availabilities) {
         this.practitionerAvailability = this.initAvailabitilties();
 
-        for (let time in data) {
-          const timeStart = moment(data[time].from, "hh:mm A", true);
-          this.practitionerAvailability[data[time].day-1].start.hh = timeStart.format('hh');
-          this.practitionerAvailability[data[time].day-1].start.mm = timeStart.format('mm');
-          this.practitionerAvailability[data[time].day-1].start.A = timeStart.format('A');
+        for (let idx = 0; idx < availabilities.length; ++idx) {
+          const timeStart = moment(availabilities[idx].from, "hh:mm A", true);
+          this.practitionerAvailability[availabilities[idx].day-1].start.hh = timeStart.format('hh');
+          this.practitionerAvailability[availabilities[idx].day-1].start.mm = timeStart.format('mm');
+          this.practitionerAvailability[availabilities[idx].day-1].start.A = timeStart.format('A');
 
-          const timeEnd = moment(data[time].to, "hh:mm A", true);
-          this.practitionerAvailability[data[time].day-1].end.hh = timeEnd.format('hh');
-          this.practitionerAvailability[data[time].day-1].end.mm = timeEnd.format('mm');
-          this.practitionerAvailability[data[time].day-1].end.A = timeEnd.format('A');
+          const timeEnd = moment(availabilities[idx].to, "hh:mm A", true);
+          this.practitionerAvailability[availabilities[idx].day-1].end.hh = timeEnd.format('hh');
+          this.practitionerAvailability[availabilities[idx].day-1].end.mm = timeEnd.format('mm');
+          this.practitionerAvailability[availabilities[idx].day-1].end.A = timeEnd.format('A');
 
-          this.practitionerAvailability[data[time].day-1].enabled = true;
+          this.practitionerAvailability[availabilities[idx].day-1].enabled = true;
         }
       },
       getAvailabilities() {
         let self = this;
-        ApiService.get(`Availability/find`, {
+        ApiService.get(`availability`, {
           withCredentials: true
         })
           .then(function (response) {
@@ -195,21 +112,21 @@
       submitChanges() {
         console.log('submitting changes');
         let self = this;
-        let toAdd = {};
+        let newAvailabilities = {};
 
         for (let i = 0; i < this.practitionerAvailability.length; ++i) {
-          let element = this.practitionerAvailability[i];
-          if (element.enabled) {
-            toAdd[element.dayNumber] = {
-              from: element.start.hh + ':' + element.start.mm + ' '  + element.start.A,
-              to: element.end.hh + ':' + element.end.mm + ' '  + element.end.A,
+          let availableDay = this.practitionerAvailability[i];
+          if (availableDay.enabled) {
+            newAvailabilities[availableDay.dayNumber] = {
+              from: availableDay.start.hh + ':' + availableDay.start.mm + ' '  + availableDay.start.A,
+              to: availableDay.end.hh + ':' + availableDay.end.mm + ' '  + availableDay.end.A,
             }
           }
         }
-        const addBody = {
-          availabilities: toAdd
+        const params = {
+          availabilities: newAvailabilities,
         };
-        ApiService.post('/availability', addBody,
+        ApiService.post('/availability', params,
           { withCredentials: true,}
         ).then(function (response) {
           self.$toast.open({
@@ -233,13 +150,18 @@
   }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style lang="scss" scoped>
+<style lang="scss">
   span.time-picker {
     width : 100%;
   }
 
   span.time-picker input.display-time {
     width: 100%;
+  }
+</style>
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style lang="scss" scoped>
+  .container {
+    padding-top: 20px;
   }
 </style>

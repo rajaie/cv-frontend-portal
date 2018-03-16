@@ -1,5 +1,5 @@
 <template>
-  <div><div class="container">
+  <div><div class="container is-fluid">
     <h1 class="title">Hi, {{ user.firstName }}.</h1>
     <article class="message">
       <div class="message-header">

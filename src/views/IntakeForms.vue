@@ -21,9 +21,15 @@
         </table>
       </div>
       <div v-if="selectedIntakeForm" class="column is-two-fifths intakeForm-column">
-        <h2 class="subtitle has-text-centered has-text-info has-text-weight-bold">
+        <h2 class="subtitle left-align has-text-weight-bold">
           Intake Form - {{selectedIntakeForm.patient.firstName}} {{selectedIntakeForm.patient.lastName}}
         </h2>
+        <div class="right-align">
+          <a @click="selectedIntakeForm=undefined;">
+            <button class="fas fa-chevron-circle-right"></button>
+          </a>
+        </div>
+        <div class="clear"></div>
         <div v-for="(section, index) in selectedIntakeForm.content.sections">
           <div v-for="sectionTitle in Object.keys(section)">
             <p><strong>{{sectionTitle}}</strong></p>

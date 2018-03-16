@@ -42,13 +42,13 @@
           }
           .menu-list {
             li {
-              :hover {
-                color: black;
-              }
               a {
                 color: white;
                 padding: 0.75em 1.75em;
                 border-radius: 0;
+                &:hover {
+                  color: black;
+                }
                 &.is-active {
                   color: white;
                   background: #0073b9;

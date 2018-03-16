@@ -1,8 +1,7 @@
 import axios from 'axios'
-import config from '@/config/config'
 
 var axiosInstance = axios.create({
-  baseURL: config.apiEndpoint,
+  baseURL: process.env.API_HOST_PORT,
   withCredentials: true,
 });
 

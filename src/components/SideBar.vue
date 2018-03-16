@@ -14,7 +14,7 @@
 </template>
 
 <script>
-  import { mainMenuLinks } from '@/shared/navigation'
+  import {mainMenuLinks} from '@/shared/navigation'
 
   export default {
     name: "side-bar",
@@ -50,8 +50,8 @@
                 padding: 0.75em 1.75em;
                 border-radius: 0;
                 &.is-active {
-                  color: black;
-                  background: white;
+                  color: white;
+                  background: #0073b9;
                 }
               }
             }

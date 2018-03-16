@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <span class="is-hidden">{{ gitHash }}</span>
     <!--Show the router-view (login component) only for the root path-->
     <div class="wrapper" v-if="this.$route.path === '/'">
       <router-view></router-view>
@@ -40,6 +41,7 @@
     },
     data() {
       return {
+        gitHash: process.env.COMMIT_HASH
       }
     },
     methods: {

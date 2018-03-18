@@ -42,8 +42,8 @@
                       <b-input v-model="selectedPatient.mobileNumber"></b-input>
                     </b-field>
                   </div>
-                  <button type="submit" name="save" @click="submitPatientUpdate" v-show="selectedPatient" class="button is-link">Save</button>
-                  <button type="reset" name="cancel" @click="undoPatientUpdate" v-show="selectedPatient" class="button is-text">Cancel</button><br>
+                  <button type="submit" name="save" @click="submitPatientUpdate" class="button is-link">Save</button>
+                  <button type="reset" name="cancel" @click="undoPatientUpdate" class="button is-text">Cancel</button><br>
                 </div>
               </div>
             </div>
@@ -58,20 +58,22 @@
                 </div>
                 <div class="clear"></div>
                 <div class="patient-edit-form">
-                  <b-field label="First Name">
-                    <b-input v-model="newPatient.firstName"></b-input>
-                  </b-field>
-                  <b-field label="Last Name">
-                    <b-input v-model="newPatient.lastName"></b-input>
-                  </b-field>
-                  <b-field label="Email">
-                    <b-input v-model="newPatient.email" placeholder="Email" type="email"></b-input>
-                  </b-field>
-                  <b-field label="Mobile Number">
-                    <b-input v-model="newPatient.mobileNumber"></b-input>
-                  </b-field>
-                  <button type="submit" name="save" @click="submitNewPatient" v-show="newPatient" class="button is-link">Save</button>
-                  <button type="reset" name="cancel" @click="undoNewPatient" v-show="newPatient" class="button is-text">Cancel</button><br>
+                  <div class="patient-form-data">
+                    <b-field label="First Name">
+                      <b-input v-model="newPatient.firstName"></b-input>
+                    </b-field>
+                    <b-field label="Last Name">
+                      <b-input v-model="newPatient.lastName"></b-input>
+                    </b-field>
+                    <b-field label="Email">
+                      <b-input v-model="newPatient.email" placeholder="Email" type="email"></b-input>
+                    </b-field>
+                    <b-field label="Mobile Number">
+                      <b-input v-model="newPatient.mobileNumber"></b-input>
+                    </b-field>
+                  </div>
+                  <button type="submit" name="create" @click="submitNewPatient" class="button is-link">Save</button>
+                  <button type="reset" name="cancel" @click="undoNewPatient" class="button is-text">Cancel</button><br>
                 </div>
               </div>
             </div>
@@ -130,7 +132,7 @@
       },
       deletePatient() {
         let self = this;
-        const confirmDelete = confirm("Are you sure you want to delete this service?");
+        const confirmDelete = confirm("Are you sure you want to delete this patient?");
         if (!confirmDelete) { return;}
 
         ApiService.delete(
@@ -159,10 +161,10 @@
       submitPatientUpdate() {
         let self = this;
         const body = {
-          'email': this.selectedPatient.email,
-          'mobileNumber': this.selectedPatient.mobileNumber,
-          'firstName': this.selectedPatient.firstName,
-          'lastName': this.selectedPatient.lastName,
+          email: this.selectedPatient.email,
+          mobile: this.selectedPatient.mobileNumber,
+          firstName: this.selectedPatient.firstName,
+          lastName: this.selectedPatient.lastName,
         }
         ApiService.put(
           '/patient/'+this.selectedPatient.id,
@@ -175,7 +177,6 @@
             type: 'is-success',
             duration: 2000
           })
-          self.selectedPatient = null;
         }).catch(function (err) {
           console.log("Error is:" + err);
           self.$toast.open({
@@ -192,7 +193,7 @@
         let self = this;
         const patientInfo = {
           email: this.newPatient.email,
-          mobileNumber: this.newPatient.mobileNumber,
+          mobile: this.newPatient.mobileNumber,
           firstName: this.newPatient.firstName,
           lastName: this.newPatient.lastName,
         };
@@ -206,8 +207,11 @@
             type: 'is-success',
             duration: 2000
           });
+          console.log(JSON.stringify(response));
+          console.log(JSON.stringify(response.data.result));
           self.getPatients();
           self.newPatient = null;
+          self.selectedPatient = response.data.result;
         }).catch(function (err) {
           self.$toast.open({
             message: 'Unable to create new patient',
@@ -229,24 +233,30 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
-  div.patient-form-data {
-    margin-bottom: 2rem;
-  }
-  div.patient-edit {
-    border: 1px solid rgba(205, 226, 224, 0.53);
-    padding: 1rem;
-    border-radius: 16px;
-  }
-  span.patient-name:hover {
-    cursor: pointer;
-  }
-  span.delete-button:hover {
-    cursor: pointer;
-  }
-  div.patient-edit-form {
-    margin-top: 2rem;
-  }
-  h2.subtitle {
-    margin-bottom:0rem;
+  .container {
+    padding-top: 20px;
+    .main-columns {
+      margin-bottom: 0;
+    }
+    div.patient-form-data {
+      margin-bottom: 2rem;
+    }
+    div.patient-edit {
+      border: 1px solid rgba(205, 226, 224, 0.53);
+      padding: 1rem;
+      border-radius: 16px;
+    }
+    span.patient-name:hover {
+      cursor: pointer;
+    }
+    span.delete-button:hover {
+      cursor: pointer;
+    }
+    div.patient-edit-form {
+      margin-top: 2rem;
+    }
+    h2.subtitle {
+      margin-bottom:0rem;
+    }
   }
 </style>

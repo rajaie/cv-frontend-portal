@@ -18,7 +18,7 @@
                   <i class="fas fa-2x fa-user-circle"></i>
                 </a>
                 <div class="navbar-dropdown is-right">
-                  <!--Show our sidebar navigation in the drop down menu on touch (mobile/tablet)-->
+                  <!--Show our sidebar navigation links in the drop down menu on touch (mobile/tablet)-->
                   <div class="is-hidden-desktop">
                     <router-link v-for="(link, index) in mainMenuLinks"
                                  :key="index" @click.native="makeBurger"

@@ -32,28 +32,20 @@
       .side-bar {
         background: #5dc0ff;
         height: 100%;
-        display: flex;
-        flex-flow: column nowrap;
-        justify-content: space-between;
-
         aside.menu {
-          span.menu-item-right {
-            margin-left: 10px;
-          }
-          .menu-list {
-            li {
-              a {
-                color: white;
-                padding: 0.75em 1.75em;
-                border-radius: 0;
-                &:hover {
-                  color: black;
-                }
-                &.is-active {
-                  color: white;
-                  background: #0073b9;
-                }
-              }
+          .menu-list li a {
+            color: white;
+            padding: 0.75em 1.75em;
+            border-radius: 0;
+            &:hover {
+              color: black;
+            }
+            &.is-active {
+              color: white;
+              background: #0073b9;
+            }
+            span.menu-item-right {
+              margin-left: 10px;
             }
           }
         }

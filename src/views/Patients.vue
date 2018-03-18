@@ -166,7 +166,7 @@
           firstName: this.selectedPatient.firstName,
           lastName: this.selectedPatient.lastName,
         }
-        ApiService.put(
+        ApiService.patch(
           '/patient/'+this.selectedPatient.id,
           body,
           { withCredentials: true }
@@ -207,8 +207,6 @@
             type: 'is-success',
             duration: 2000
           });
-          console.log(JSON.stringify(response));
-          console.log(JSON.stringify(response.data.result));
           self.getPatients();
           self.newPatient = null;
           self.selectedPatient = response.data.result;

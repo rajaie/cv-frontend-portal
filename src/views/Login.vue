@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="login">
-      <div>
+      <div class="login-form">
         <div class="logo">
           <img src="../assets/logo.png">
         </div>
@@ -99,7 +99,9 @@
     justify-content: center;
     flex-wrap: wrap;
     height: 70vh;
-
+    .login-form {
+      width: 230px;
+    },
     .logo {
       width: 100%;
       padding: 0 12px 20px 0;

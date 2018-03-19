@@ -262,7 +262,7 @@
       async createService() {
         console.log("Creating service")
         let self = this;
-         newService = Object.assign({}, this.selectedService);
+        const newService = Object.assign({}, this.selectedService);
 
         try {
           const res = await ApiService({

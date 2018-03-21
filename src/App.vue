@@ -51,7 +51,7 @@
           ApiService.get('/user/authenticated').then()
             .catch(function (err) {
               console.log(err.response)
-              if (err.response && err.response.status === 403) {
+              if (err.response && [403, 401].includes(err.response.status)) {
                 self.$store.commit("logout");
                 self.$router.replace('/')
               }
@@ -64,7 +64,7 @@
         this.$store.dispatch("getProfile", this.$store.state.auth.user.id);
       }
 
-      setInterval(checkLogin, 6000)
+      setInterval(checkLogin, 60000)
     },
     data() {
       return {

@@ -40,9 +40,31 @@
       SideBar
     },
     async created() {
+      let self = this;
+
+      // Check that the user, and log them out if not.
+      // This is in case we force logout a user on the backend side.
+      function checkLogin() {
+        // TODO: use interceptor instead of this ghetto method
+        if (self.$store.state.auth.isAuthenticated) {
+          console.log("Check authentication status...")
+          ApiService.get('/user/authenticated').then()
+            .catch(function (err) {
+              console.log(err.response)
+              if (err.response && err.response.status === 403) {
+                self.$store.commit("logout");
+                self.$router.replace('/')
+              }
+            })
+        }
+      }
+
+      // Get profile to store it in local storage
       if (this.$store.state.auth.isAuthenticated) {
         this.$store.dispatch("getProfile", this.$store.state.auth.user.id);
       }
+
+      setInterval(checkLogin, 6000)
     },
     data() {
       return {

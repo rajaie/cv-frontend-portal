@@ -58,23 +58,6 @@
     },
     created() {
       let self = this;
-
-      function checkLogin() {
-        // TODO: use interceptor instead of this ghetto method
-        ApiService.get('/user/authenticated').then()
-          .catch(function (err) {
-            console.log(err.response)
-            if (err.response && err.response.status === 403) {
-              self.$store.commit("logout");
-              self.$router.replace('/')
-            }
-        })
-      }
-
-      // Check if the user is still logged in.
-      // Do this on each page load, and once/minute.
-      checkLogin()
-      setInterval(checkLogin, 6000000)
     },
     methods: {
       makeBurger() {

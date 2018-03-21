@@ -88,8 +88,7 @@
             },
             sort: 'startDateTime ASC',
             limit: 100
-          },
-          withCredentials: true
+          }
         }
           )
           .then(res => self.appointments = res.data.result)
@@ -111,8 +110,7 @@
             },
             sort: 'startDateTime ASC',
             limit: 100
-          },
-          withCredentials: true
+          }
         }
           )
           .then(res => self.breaks = res.data.result)

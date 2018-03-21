@@ -13,6 +13,7 @@
     "axios": "^0.17.1",
     "buefy": "^0.6.3",
     "fullcalendar": "^3.8.2",
+    "jsonwebtoken": "^8.2.0",
     "moment-timezone": "^0.5.14",
     "vue": "^2.5.2",
     "vue-full-calendar": "^2.5.2",

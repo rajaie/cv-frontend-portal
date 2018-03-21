@@ -79,9 +79,7 @@
       getProfile(){
         let self = this;
         console.log("getting profile");
-        ApiService.get('/user/'+this.$store.state.auth.user.id, {
-          withCredentials: true
-        }).then(function(response) {
+        ApiService.get('/user/'+this.$store.state.auth.user.id).then(function(response) {
           self.user.username = response.data.result.username;
           self.user.email = response.data.result.email;
           self.user.mobileNumber = response.data.result.mobileNumber;
@@ -101,9 +99,7 @@
         }
         ApiService.put(
           '/user/'+self.$store.state.auth.user.id,
-          body,
-          { withCredentials: true }
-        ).then(function(response) {
+          body).then(function(response) {
           self.$toast.open({
             message: 'Profile updated successfully',
             type: 'is-success',
@@ -126,8 +122,7 @@
         }
         ApiService.put(
           '/updatePassword/'+this.$store.state.auth.user.id,
-          body,
-          { withCredentials: true }
+          body
         ).then(function(response) {
           console.log('response = ' + JSON.stringify(response));
 

@@ -97,7 +97,6 @@
             i.appointmentDateTimeMoment = moment.tz(i.startDateTime, i.appointment.timezone)
             i.appointment.duration = moment(i.appointment.endDateTime).diff(i.appointment.startDateTime, 'minutes')
           })
-          console.log(this.invoices)
         }
         catch (e) {
           console.log(e.data.message);
@@ -107,7 +106,6 @@
         try {
           const clinic = await ApiService.get('/clinic/0')
           this.clinic = clinic.data.result
-          console.log(this.invoices)
         }
         catch (e) {
           console.log(e.data.message);

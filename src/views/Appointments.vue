@@ -330,8 +330,7 @@
                     },
                     sort: 'startDateTime ASC',
                     limit: 100
-                  },
-                  withCredentials: true
+                  }
                 }
               )
                 .then(res => {
@@ -431,16 +430,12 @@
       },
       getServices() {
         let self = this;
-        ApiService.get('/service', {
-          withCredentials: true
-        }).then(res => self.services = res.data.result)
+        ApiService.get('/service').then(res => self.services = res.data.result)
           .catch(err => console.log(err))
       },
       getPatients() {
         let self = this;
-        ApiService.get('/patient', {
-          withCredentials: true
-        }).then(res => self.patients = res.data.result)
+        ApiService.get('/patient').then(res => self.patients = res.data.result)
           .catch(err => console.log(err))
       },
       startAppointmentDraft() {
@@ -473,9 +468,7 @@
           status: 0,
         };
 
-        ApiService.post(`/appointment`, bodyParams, {
-          withCredentials: true
-        }).then(function (response) {
+        ApiService.post(`/appointment`, bodyParams).then(function (response) {
           console.log(response.data.message);
           self.serviceBooking = null
           // TODO: create function which returns an initialBreakData()
@@ -601,9 +594,7 @@
         const confirmedCancel = confirm("Are you sure you want to cancel this appointment?");
 
         if (confirmedCancel) {
-          ApiService.delete(`/appointment/${appointment.id}`, {
-            withCredentials: true
-          }).then(function (response) {
+          ApiService.delete(`/appointment/${appointment.id}`).then(function (response) {
               console.log(response.data.message);
               self.selectedAppointment = null
               self.$toast.open({
@@ -626,8 +617,7 @@
             date: date,
             serviceId: self.serviceBooking.service.id,
             practitionerId: self.$store.state.auth.user.id
-          },
-          withCredentials: true
+          }
         })
           .then(function (response) {
             const times = response.data.result;
@@ -648,8 +638,7 @@
             date: date,
             duration: self.breakBooking.duration,
             practitionerId: self.$store.state.auth.user.id
-          },
-          withCredentials: true
+          }
         })
           .then(function (response) {
             const times = response.data.result;

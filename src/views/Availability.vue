@@ -94,9 +94,7 @@
       },
       getAvailabilities() {
         let self = this;
-        ApiService.get(`availability`, {
-          withCredentials: true
-        })
+        ApiService.get(`availability`)
           .then(function (response) {
             self.availabilityData = response.data.result;
             self.setAvailabilities(self.availabilityData);
@@ -126,9 +124,7 @@
         const params = {
           availabilities: newAvailabilities,
         };
-        ApiService.post('/availability', params,
-          { withCredentials: true,}
-        ).then(function (response) {
+        ApiService.post('/availability', params).then(function (response) {
           self.$toast.open({
             message: 'Saved Succesfully',
             type: 'is-success',

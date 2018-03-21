@@ -39,6 +39,11 @@
       TopBar,
       SideBar
     },
+    async created() {
+      if (this.$store.state.auth.isAuthenticated) {
+        this.$store.dispatch("getProfile", this.$store.state.auth.user.id);
+      }
+    },
     data() {
       return {
         gitHash: process.env.COMMIT_HASH

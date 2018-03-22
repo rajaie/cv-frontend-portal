@@ -105,7 +105,8 @@
             type: 'is-success',
             duration: 2000
           })
-          self.$store.commit("login", response.data.result[0]);
+          const user = response.data.result[0]
+          self.$store.commit("setUser", user);
         }).catch(function (err) {
           self.$toast.open({
             message: 'Unable to update profile',

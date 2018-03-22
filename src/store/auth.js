@@ -6,7 +6,8 @@ import ApiService from '@/services/ApiService'
 export default {
   state: {
     isAuthenticated: !!localStorage.token,
-    user: localStorage.user ? JSON.parse(localStorage.user) : {}
+    user: localStorage.user ? JSON.parse(localStorage.user) : {},
+    clinic: localStorage.clinic ? JSON.parse(localStorage.clinic) : {}
   },
   mutations: {
     login(state, token) {
@@ -32,6 +33,10 @@ export default {
     setUser(state, user) {
       localStorage.user = JSON.stringify(user)
       state.user = user;
+    },
+    setClinic(state, clinic) {
+      localStorage.user = JSON.stringify(clinic)
+      state.clinic = clinic;
     }
   },
   actions: {
@@ -40,6 +45,12 @@ export default {
       const res = await ApiService.get(`/user/${userId}`)
       const user = res.data.result
       commit('setUser', user)
+    },
+    async getClinic({ commit, state }, clinicId) {
+      console.log("Getting clinic info")
+      const res = await ApiService.get(`/clinic/1`)
+      const clinic = res.data.result
+      commit('setClinic', clinic)
     }
   }
 }

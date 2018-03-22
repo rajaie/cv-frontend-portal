@@ -62,6 +62,7 @@
       // Get profile to store it in local storage
       if (this.$store.state.auth.isAuthenticated) {
         this.$store.dispatch("getProfile", this.$store.state.auth.user.id);
+        this.$store.dispatch("getClinic", this.$store.state.auth.user.clinic);
       }
 
       setInterval(checkLogin, 60000)

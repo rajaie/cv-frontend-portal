@@ -54,22 +54,28 @@
     computed: {
     },
     methods: {
-      loginSuccessful(req) {
+      async loginSuccessful(res) {
         let self = this;
-        console.log("Login succeeded");
 
-        this.$store.commit("login", req.data.result);
+        console.log(res.data.message);
+        this.$store.commit("login", res.data.result.token);
 
-        self.error = undefined;
-        self.user = req.data.result;
+        // Initialize token for ApiService here, since it was initially 'null' when the component first loaded
+        ApiService.defaults.headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`
 
+        this.$store.dispatch("getProfile", this.$store.state.auth.user.id);
         this.$router.replace(this.$route.query.redirect || '/dash')
       },
-      loginFailed() {
+      loginFailed(err) {
         let self = this;
-        console.log("Login failed");
+
         this.$store.commit("logout");
-        self.error = "Incorrect username and password combination"
+        if (err.response && err.response.headers) {
+          self.error = err.response.data.message
+        }
+        else {
+          self.error = "Temporary server error, please try again"
+        }
       },
       login() {
         let self = this;
@@ -77,14 +83,12 @@
         ApiService.post('/login', {
           username: self.username,
           password: self.password
-        }, {
-          withCredentials: true
         })
-          .then(function (req) {
-            self.loginSuccessful(req)
+          .then(function (res) {
+            self.loginSuccessful(res)
           })
           .catch(function (err) {
-            self.loginFailed()
+            self.loginFailed(err)
         })
       }
     }

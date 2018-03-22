@@ -183,7 +183,6 @@
       getServices() {
         let self = this;
         ApiService.get('/service', {
-          withCredentials: true,
           params: {
             populateSubcriteria: {
               'practitioners': {
@@ -205,8 +204,7 @@
                 deleted: false,
               },
               sort: 'id ASC',
-            },
-            withCredentials:true
+            }
           }
         ).then(function(response) {
           self.practitioners = response.data.result
@@ -221,8 +219,7 @@
         try {
           await ApiService({
             url: `/service/${serviceId}`,
-            method: 'delete',
-            withCredentials: true
+            method: 'delete'
           })
 
           const serviceIdx = this.services.findIndex(s => s.id === serviceId);
@@ -246,7 +243,6 @@
         ApiService({
           url: `service/${serviceId}/practitioners/${practitionerId}`,
           method: method,
-          withCredentials: true,
         }).then(res => {
           console.log(res.data.message)
           self.getServices()
@@ -268,7 +264,6 @@
           const res = await ApiService({
             url: `/service`,
             method: 'post',
-            withCredentials: true,
             data: newService
           })
 
@@ -295,10 +290,7 @@
 
         updatedService.enabled = (updatedService.enabled === "enabled") ? true : false
 
-        ApiService.patch(`/service/${updatedService.id}`, updatedService,
-          {
-            withCredentials: true
-          }).then(res => {
+        ApiService.patch(`/service/${updatedService.id}`, updatedService).then(res => {
           self.setService(res.data.result[0])
           self.getServices()
           self.$toast.open({

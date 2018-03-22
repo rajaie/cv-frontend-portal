@@ -133,8 +133,7 @@
                 deleted: false,
               },
               sort: 'id ASC',
-            },
-            withCredentials:true
+            }
           }
         ).then(function(response) {
           self.userList = response.data.result;
@@ -157,9 +156,7 @@
         }
         ApiService.put(
           '/user/'+this.selectedUser.id,
-          body,
-          { withCredentials: true }
-        ).then(function(response) {
+          body).then(function(response) {
           self.$toast.open({
             message: 'Profile updated successfully',
             type: 'is-success',
@@ -198,8 +195,7 @@
         if (!confirmDelete) { return;}
 
         ApiService.delete(
-          '/user/'+this.selectedUser.id,
-          { withCredentials: true }
+          '/user/'+this.selectedUser.id
         ).then(function(response) {
           self.$toast.open({
             message: 'Profile deleted successfully',
@@ -240,8 +236,7 @@
         };
         ApiService.post(
           '/user/',
-          userInfo,
-          {withCredentials: true,}
+          userInfo
         ).then(function(response) {
           self.$toast.open({
             message: 'New user created successfully',

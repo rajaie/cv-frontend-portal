@@ -118,8 +118,7 @@
             },
             populate: "false",
             sort: 'id ASC',
-          },
-          withCredentials:true,
+          }
         }).then(function(response) {
           console.log('results = ' + JSON.stringify(response.data.result));
           self.patientList = response.data.result;
@@ -136,9 +135,7 @@
         if (!confirmDelete) { return;}
 
         ApiService.delete(
-          '/patient/'+this.selectedPatient.id,
-          { withCredentials: true }
-        ).then(function(response) {
+          '/patient/'+this.selectedPatient.id).then(function(response) {
           self.$toast.open({
             message: 'Patient deleted successfully',
             type: 'is-success',
@@ -168,9 +165,7 @@
         }
         ApiService.patch(
           '/patient/'+this.selectedPatient.id,
-          body,
-          { withCredentials: true }
-        ).then(function(response) {
+          body).then(function(response) {
           self.getPatients();
           self.$toast.open({
             message: 'Patient updated successfully',
@@ -199,8 +194,7 @@
         };
         ApiService.post(
           '/patient/',
-          patientInfo,
-          {withCredentials: true,}
+          patientInfo
         ).then(function(response) {
           self.$toast.open({
             message: 'New patient created successfully',

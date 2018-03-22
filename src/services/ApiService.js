@@ -1,10 +1,14 @@
 import axios from 'axios'
 
+function getAuthHeader() {
+  const token = localStorage.getItem('token');
+
+  return token ? {Authorization: `Bearer ${token}`} : {}
+}
+
 var axiosInstance = axios.create({
   baseURL: process.env.API_HOST_PORT,
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token')}`
-  }
+  headers: getAuthHeader()
 });
 
 export default axiosInstance

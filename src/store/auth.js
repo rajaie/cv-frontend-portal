@@ -25,6 +25,7 @@ export default {
     logout(state) {
       delete localStorage.token
       delete localStorage.user
+      delete ApiService.defaults.headers['Authorization']
 
       state.isAuthenticated = false;
       state.user = {};

@@ -54,11 +54,11 @@
     computed: {
     },
     methods: {
-      async loginSuccessful(req) {
+      async loginSuccessful(res) {
         let self = this;
 
-        console.log(req.data.message);
-        this.$store.commit("login", req.data.result.token);
+        console.log(res.data.message);
+        this.$store.commit("login", res.data.result.token);
 
         // Initialize token for ApiService here, since it was initially 'null' when the component first loaded
         ApiService.defaults.headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`
@@ -84,8 +84,8 @@
           username: self.username,
           password: self.password
         })
-          .then(function (req) {
-            self.loginSuccessful(req)
+          .then(function (res) {
+            self.loginSuccessful(res)
           })
           .catch(function (err) {
             self.loginFailed(err)

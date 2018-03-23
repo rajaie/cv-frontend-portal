@@ -61,6 +61,7 @@
   // TODO: show tax calculation in the invoice (include it in the Invoice record?)
   import ApiService from '@/services/ApiService'
   import moment from 'moment-timezone'
+  import { mapState } from 'vuex'
 
   export default {
     name: 'Invoices',
@@ -68,14 +69,16 @@
       return {
         invoices: [],
         selectedInvoice: null,
-        clinic: {},
       }
     },
     computed: {
+      ...mapState({
+        user: state => state.auth.user,
+        clinic: state => state.auth.clinic,
+      })
     },
     created() {
       this.getInvoices();
-      this.getClinic();
     },
     methods: {
       isRowSelected(rowId) {
@@ -92,20 +95,11 @@
         try {
           const invoices = await ApiService.get('/invoice')
           this.invoices = invoices.data.result
-          this.invoices.forEach(function(i) {
-            i.createdAtMoment = moment.tz(i.createdAt, i.appointment.timezone)
-            i.appointmentDateTimeMoment = moment.tz(i.startDateTime, i.appointment.timezone)
-            i.appointment.duration = moment(i.appointment.endDateTime).diff(i.appointment.startDateTime, 'minutes')
+          this.invoices.forEach(function(invoice) {
+            invoice.createdAtMoment = moment.tz(invoice.createdAt, invoice.appointment.timezone)
+            invoice.appointmentDateTimeMoment = moment.tz(invoice.startDateTime, invoice.appointment.timezone)
+            invoice.appointment.duration = moment(invoice.appointment.endDateTime).diff(invoice.appointment.startDateTime, 'minutes')
           })
-        }
-        catch (e) {
-          console.log(e.data.message);
-        }
-      },
-      async getClinic() {
-        try {
-          const clinic = await ApiService.get('/clinic/0')
-          this.clinic = clinic.data.result
         }
         catch (e) {
           console.log(e.data.message);

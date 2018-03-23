@@ -59,10 +59,11 @@
         }
       }
 
-      // Get profile to store it in local storage
+      // We're going to need the current User and Clinic information pretty frequently,
+      // so let's just fetch them every time the page is refreshed.
       if (this.$store.state.auth.isAuthenticated) {
-        this.$store.dispatch("getProfile", this.$store.state.auth.user.id);
-        this.$store.dispatch("getClinic", this.$store.state.auth.user.clinic);
+        this.$store.dispatch("getProfile");
+        this.$store.dispatch("getClinic");
       }
 
       setInterval(checkLogin, 60000)

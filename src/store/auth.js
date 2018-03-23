@@ -40,15 +40,17 @@ export default {
     }
   },
   actions: {
-    async getProfile({ commit, state }, userId) {
+    async getProfile({ commit, state }) {
+      const userId = state.user.id;
       console.log("Getting user profile")
       const res = await ApiService.get(`/user/${userId}`)
       const user = res.data.result
       commit('setUser', user)
     },
-    async getClinic({ commit, state }, clinicId) {
+    async getClinic({ commit, state }) {
+      const clinicId = state.user.clinic
       console.log("Getting clinic info")
-      const res = await ApiService.get(`/clinic/1`)
+      const res = await ApiService.get(`/clinic/${clinicId}`)
       const clinic = res.data.result
       commit('setClinic', clinic)
     }

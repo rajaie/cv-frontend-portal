@@ -63,8 +63,8 @@
         // Initialize token for ApiService here, since it was initially 'null' when the component first loaded
         ApiService.defaults.headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`
 
-        this.$store.dispatch("getProfile", this.$store.state.auth.user.id);
-        this.$store.dispatch("getClinic", this.$store.state.auth.user.clinic);
+        this.$store.dispatch("getProfile");
+        this.$store.dispatch("getClinic");
         this.$router.replace(this.$route.query.redirect || '/dash')
       },
       loginFailed(err) {

@@ -1,23 +1,33 @@
 <template>
       <div class="top-bar">
-        <div class="navbar is-fixed-top">
+        <div class="navbar is-fixed-top is-transparent">
+          <!-- left side -->
           <div class="navbar-brand">
             <router-link class="navbar-item" to="dash">
               <img src="@/assets/logo.png" width="112" height="28">
             </router-link>
+            <!-- burger only shows on mobile -->
             <div @click="makeBurger" :class="['navbar-burger', { 'is-active': burgerIsActive }]" data-target="navMenu">
               <span></span>
               <span></span>
               <span></span>
             </div>
           </div>
+          <!-- right side -->
           <div class="navbar-menu" :class="['navbar-menu', { 'is-active': burgerIsActive }]" id="navMenu">
             <div class="navbar-end">
+              <div class="navbar-item meta">
+                {{ user.firstName }} {{ user.lastName }}, {{ clinic.name }}
+              </div>
               <div class="navbar-item has-dropdown is-hoverable">
                 <a class="navbar-link is-hidden-touch">
                   <i class="fas fa-2x fa-user-circle"></i>
                 </a>
+
+                <!-- dropdown menu -->
                 <div class="navbar-dropdown is-right">
+
+                  <!-- Touch (mobile and tablet) ONLY -->
                   <!--Show our sidebar navigation links in the drop down menu on touch (mobile/tablet)-->
                   <div class="is-hidden-desktop">
                     <router-link v-for="(link, index) in mainMenuLinks"
@@ -28,6 +38,8 @@
                     </router-link>
                     <hr class="navbar-divider is-block-touch">
                   </div>
+                  <!-- /touch -->
+
                   <!--Always show these links whatever the screen size-->
                   <router-link @click.native="makeBurger" to="/profile" class="navbar-item" active-class="is-active">
                     Profile
@@ -37,6 +49,7 @@
                   </router-link>
                   <a class="navbar-item" @click="logout">Logout</a>
                 </div>
+                <!-- /dropdown -->
               </div>
             </div>
           </div>
@@ -47,6 +60,7 @@
 <script>
   import { mainMenuLinks } from '@/shared/navigation'
   import ApiService from '@/services/ApiService'
+  import { mapState } from 'vuex'
 
   export default {
     name: "top-bar",
@@ -58,6 +72,12 @@
     },
     created() {
       let self = this;
+    },
+    computed: {
+      ...mapState({
+        user: state => state.auth.user,
+        clinic: state => state.auth.clinic,
+      })
     },
     methods: {
       makeBurger() {
@@ -77,6 +97,17 @@
   }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+  .navbar {
+    .navbar-menu {
+      .meta {
+        position: relative;
+        right: -22px;
+        .clinicName {
+          /*padding-left: 10px;*/
+        }
+      }
+    }
+  }
 
 </style>

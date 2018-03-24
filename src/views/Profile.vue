@@ -12,8 +12,8 @@
           <div v-if="changePassword">
             <div class="change-password-form">
               <ul class="password-list">
-                <li>Current Password <br><input type="password" name="old-password" v-model="oldPassword"><br></li>
-                <li>New Password <br><input type="password" name="new-password" v-model="newPassword"><br></li>
+                <li>Current Password <br><input class="input" type="password" name="old-password" v-model="oldPassword"><br></li>
+                <li>New Password <br><input class="input" type="password" name="new-password" v-model="newPassword"><br></li>
               </ul>
               <button type="submit" name="save-password" @click="updatePassword" class="button is-link">Save</button>
               <button type="reset" name="cancel-password" @click="disablePasswordView" class="button is-text">Cancel</button><br>
@@ -23,12 +23,12 @@
           <div v-else>
             <div class="settings-form">
               <ul class="settings-list">
-                <li>Username:<br> <input type="text" name="username" v-model="userEdit.username" disabled=true><br></li>
-                <li>Role:<br> <input type="text" name="role" v-model="userEdit.role" disabled=true><br></li>
-                <li>First Name:<br> <input type="text" name="first-name" v-model="userEdit.firstName" :disabled="!editMode"></li>
-                <li>Last Name:<br> <input type="text" name="last-name" v-model="userEdit.lastName":disabled="!editMode"><br></li>
-                <li>Email:<br> <input type="email" name="email" v-model="userEdit.email" :disabled="!editMode"><br></li>
-                <li>Mobile Number:<br> <input type="tel" name="mobile-number" v-model="userEdit.mobileNumber" :disabled="!editMode"><br></li>
+                <li>Username:<br> <input class="input" type="text" name="username" v-model="userEdit.username" disabled=true><br></li>
+                <li>Role:<br> <input class="input" type="text" name="role" v-model="userEdit.role" disabled=true><br></li>
+                <li>First Name:<br> <input class="input" type="text" name="first-name" v-model="userEdit.firstName" :disabled="!editMode"></li>
+                <li>Last Name:<br> <input class="input" type="text" name="last-name" v-model="userEdit.lastName":disabled="!editMode"><br></li>
+                <li>Email:<br> <input class="input" type="email" name="email" v-model="userEdit.email" :disabled="!editMode"><br></li>
+                <li>Mobile Number:<br> <input class="input" type="tel" name="mobile-number" v-model="userEdit.mobileNumber" :disabled="!editMode"><br></li>
               </ul>
               <button type="submit" name="save" @click="updateProfile" v-show="editMode" class="button is-link">Save</button>
               <button type="reset" name="cancel" @click="cancelUpdate" v-show="editMode" class="button is-text">Cancel</button><br>

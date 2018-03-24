@@ -23,15 +23,15 @@
           <div v-else>
             <div class="settings-form">
               <ul class="settings-list">
-                <li>Username:<br> <input type="text" name="username" v-model="user.username" disabled=true><br></li>
-                <li>Role:<br> <input type="text" name="role" v-model="user.role" disabled=true><br></li>
-                <li>First Name:<br> <input type="text" name="first-name" v-model="user.firstName" :disabled="!editMode"></li>
-                <li>Last Name:<br> <input type="text" name="last-name" v-model="user.lastName":disabled="!editMode"><br></li>
-                <li>Email:<br> <input type="email" name="email" v-model="user.email" :disabled="!editMode"><br></li>
-                <li>Mobile Number:<br> <input type="tel" name="mobile-number" v-model="user.mobileNumber" :disabled="!editMode"><br></li>
+                <li>Username:<br> <input type="text" name="username" v-model="userEdit.username" disabled=true><br></li>
+                <li>Role:<br> <input type="text" name="role" v-model="userEdit.role" disabled=true><br></li>
+                <li>First Name:<br> <input type="text" name="first-name" v-model="userEdit.firstName" :disabled="!editMode"></li>
+                <li>Last Name:<br> <input type="text" name="last-name" v-model="userEdit.lastName":disabled="!editMode"><br></li>
+                <li>Email:<br> <input type="email" name="email" v-model="userEdit.email" :disabled="!editMode"><br></li>
+                <li>Mobile Number:<br> <input type="tel" name="mobile-number" v-model="userEdit.mobileNumber" :disabled="!editMode"><br></li>
               </ul>
-              <button type="submit" name="save" @click="disableEditView();updateProfile()" v-show="editMode" class="button is-link">Save</button>
-              <button type="reset" name="cancel" @click="disableEditView" v-show="editMode" class="button is-text">Cancel</button><br>
+              <button type="submit" name="save" @click="updateProfile" v-show="editMode" class="button is-link">Save</button>
+              <button type="reset" name="cancel" @click="cancelUpdate" v-show="editMode" class="button is-text">Cancel</button><br>
               <button type="button" name="change-password" @click="enablePasswordView" class="button is-link">Change Password</button>
             </div>
           </div>
@@ -55,14 +55,8 @@
     name: 'Profile',
     data() {
       return {
-        user : {
-          username : '',
-          email : '',
-          mobileNumber : '',
-          firstName : '',
-          lastName : '',
-          role : '',
-        },
+        userSaved: this.initUser(),
+        userEdit: this.initUser(),
         editMode : false,
         changePassword : false,
         oldPassword : '',
@@ -76,26 +70,43 @@
       this.getProfile();
     },
     methods: {
+      initUser () {
+        return {
+          username: '',
+          email: '',
+          mobileNumber: '',
+          firstName: '',
+          lastName: '',
+          role: '',
+        }
+      },
+      parseUser(result) {
+        return {
+          username: result.username,
+          email: result.email,
+          mobileNumber: result.mobileNumber,
+          firstName: result.firstName,
+          lastName: result.lastName,
+          role: result.role,
+        }
+      },
       getProfile(){
         let self = this;
         console.log("getting profile");
         ApiService.get('/user/'+this.$store.state.auth.user.id).then(function(response) {
-          self.user.username = response.data.result.username;
-          self.user.email = response.data.result.email;
-          self.user.mobileNumber = response.data.result.mobileNumber;
-          self.user.firstName = response.data.result.firstName;
-          self.user.lastName = response.data.result.lastName;
-          self.user.role = response.data.result.role;
+          self.userSaved = self.parseUser(response.data.result);
+          self.userEdit = self.parseUser(response.data.result);
         }).catch(err => console.log(err))
+
       },
       updateProfile() {
         let self = this;
         const body = {
-          'email': this.user.email,
-          'mobileNumber': this.user.mobileNumber,
-          'firstName': this.user.firstName,
-          'lastName': this.user.lastName,
-          'role' : this.user.role,
+          'email': this.userEdit.email,
+          'mobileNumber': this.userEdit.mobileNumber,
+          'firstName': this.userEdit.firstName,
+          'lastName': this.userEdit.lastName,
+          'role' : this.userEdit.role,
         }
         ApiService.put(
           '/user/'+self.$store.state.auth.user.id,
@@ -104,16 +115,23 @@
             message: 'Profile updated successfully',
             type: 'is-success',
             duration: 2000
-          })
+          });
           const user = response.data.result[0]
           self.$store.commit("setUser", user);
+          self.userSaved = self.parseUser(response.data.result[0]);
+          self.userEdit = self.parseUser(response.data.result[0]);
         }).catch(function (err) {
+          console.log(err);
           self.$toast.open({
             message: 'Unable to update profile',
             type: 'is-danger',
             duration: 2000
           })
         });
+      },
+      cancelUpdate() {
+        this.userEdit = Object.assign(this.userSaved);
+        this.disableEditView();
       },
       updatePassword() {
         let self = this;

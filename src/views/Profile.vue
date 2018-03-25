@@ -80,22 +80,12 @@
           role: '',
         }
       },
-      parseUser(result) {
-        return {
-          username: result.username,
-          email: result.email,
-          mobileNumber: result.mobileNumber,
-          firstName: result.firstName,
-          lastName: result.lastName,
-          role: result.role,
-        }
-      },
       getProfile(){
         let self = this;
         console.log("getting profile");
         ApiService.get('/user/'+this.$store.state.auth.user.id).then(function(response) {
-          self.userSaved = self.parseUser(response.data.result);
-          self.userEdit = self.parseUser(response.data.result);
+          self.userSaved = Object.assign({}, response.data.result);
+          self.userEdit = Object.assign({}, response.data.result);
         }).catch(err => console.log(err))
 
       },
@@ -108,7 +98,7 @@
           'lastName': this.userEdit.lastName,
           'role' : this.userEdit.role,
         }
-        ApiService.put(
+        ApiService.patch(
           '/user/'+self.$store.state.auth.user.id,
           body).then(function(response) {
           self.$toast.open({
@@ -118,8 +108,8 @@
           });
           const user = response.data.result[0]
           self.$store.commit("setUser", user);
-          self.userSaved = self.parseUser(response.data.result[0]);
-          self.userEdit = self.parseUser(response.data.result[0]);
+          self.userSaved = Object.assign({}, response.data.result[0]);
+          self.userEdit = Object.assign({}, response.data.result[0]);
         }).catch(function (err) {
           console.log(err);
           self.$toast.open({
@@ -130,7 +120,7 @@
         });
       },
       cancelUpdate() {
-        this.userEdit = Object.assign(this.userSaved);
+        this.userEdit = Object.assign({}, this.userSaved);
         this.disableEditView();
       },
       updatePassword() {

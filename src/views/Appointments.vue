@@ -6,8 +6,39 @@
         <button class="fas fa-plus-circle fa-xs"></button>
       </a>
     </h1>
+    {{practitionerFilterSelect}}
     <div class="columns is-multiline">
+      <div v-if="practitionerFilterView" class="column is-2">
+        <div class="practitioner filter">
+          <h2 class="subtitle left-align">Practitioners</h2>
+          <a @click="practitionerFilterView=false" class="right-align"><i class="fas fa-chevron-circle-left"></i></a>
+          <section>
+              <b-checkbox v-for="practitioner in practitioners"  v-model="practitionerFilterSelect" :key="practitioner.id"
+                :native-value="practitioner.id">
+                {{practitioner.firstName}} {{practitioner.lastName}}
+              </b-checkbox>
+          </section>
+        </div>
+      </div>
+      <div v-else class="column is-1">
+        <div class="practitioner filter">
+          <h2 class="subtitle left-align"></h2>
+          <a @click="practitionerFilterView=true" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
+        </div>
+      </div>
       <div class="column">
+        <div class="practitioner-dropdown">
+          <nav class="navbar">
+            <div class="navbar-brand">
+              <b-dropdown>
+                <a class="navbar-item" slot="trigger">
+                  <span>Practitioners</span>
+                  <b-icon icon="menu-down"></b-icon>
+                </a>
+              </b-dropdown>
+            </div>
+          </nav>
+        </div>
         <full-calendar ref="calendar"
                        :event-sources="eventSources"
                        :header="calendarOptions.header"
@@ -75,69 +106,82 @@
              ****************** BOOK A SERVICE SECTION **************
              ********************************************************** -->
         <div class="service-booking">
-              <h2 class="subtitle left-align">New Appointment</h2>
-              <a @click="serviceBooking=undefined" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
-              <div class="clear"></div>
-              <div class="appointment-details-content">
-                <b-field label="Service">
-                  <b-autocomplete rounded
-                    v-model="serviceBooking.serviceName"
-                    :data="filteredServices"
-                    :open-on-focus="true"
-                    field="name"
-                    icon-pack="fa"
-                    placeholder="e.g. Massage"
-                    icon="search"
-                    @select="selectService">
-                    <template slot="empty">No results found</template>
-                  </b-autocomplete>
-                </b-field>
-                <b-field label="Date">
-                  <b-datepicker
-                    placeholder="Click to select..."
-                    icon="calendar-alt"
-                    icon-pack="fa"
-                    v-model="serviceBooking.date"
-                    :min-date="datePickerOptions.minDate"
-                    :date-formatter="datePickerOptions.dateFormatter"
-                    :first-day-of-week=1
-                    position="is-bottom-left">
-                  </b-datepicker>
-                </b-field>
-                <b-field label="Start Time">
-                  <b-select placeholder="Select a time"
-                            :disabled="serviceBooking.date === undefined || serviceBooking.service === undefined"
-                            v-model="serviceBooking.time">
-                    <option v-for="time in availableSlots"
-                            :value="time">
-                      {{ time }}
-                    </option>
-                  </b-select>
-                </b-field>
+          <h2 class="subtitle left-align">New Appointment</h2>
+          <a @click="serviceBooking=undefined" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
+          <div class="clear"></div>
+          <div class="appointment-details-content">
+            <b-field label="Service">
+              <b-autocomplete rounded
+                v-model="serviceBooking.serviceName"
+                :data="filteredServices"
+                :open-on-focus="true"
+                field="name"
+                icon-pack="fa"
+                placeholder="e.g. Massage"
+                icon="search"
+                @select="selectService">
+                <template slot="empty">No results found</template>
+              </b-autocomplete>
+            </b-field>
+            <b-field label="Practitioner">
+              <b-autocomplete rounded
+                v-model="serviceBooking.practitionerName"
+                :data="filteredPractitioners"
+                :open-on-focus="true"
+                field="fullName"
+                icon-pack="fa"
+                placeholder="e.g. James Ali"
+                icon="search"
+                @select="selectPractitioner">
+                <template slot="empty">No results found</template>
+              </b-autocomplete>
+            </b-field>
+            <b-field label="Date">
+              <b-datepicker
+                placeholder="Click to select..."
+                icon="calendar-alt"
+                icon-pack="fa"
+                v-model="serviceBooking.date"
+                :min-date="datePickerOptions.minDate"
+                :date-formatter="datePickerOptions.dateFormatter"
+                :first-day-of-week=1
+                position="is-bottom-left">
+              </b-datepicker>
+            </b-field>
+            <b-field label="Start Time">
+              <b-select placeholder="Select a time"
+                        :disabled="serviceBooking.date === undefined || serviceBooking.practitioner === undefined || serviceBooking.service === undefined"
+                        v-model="serviceBooking.time">
+                <option v-for="time in availableSlots"
+                        :value="time">
+                  {{ time }}
+                </option>
+              </b-select>
+            </b-field>
 
-                <b-field label="Patient">
-                  <b-autocomplete
-                    rounded
-                    v-model="serviceBooking.patientName"
-                    :data="filteredPatients"
-                    :open-on-focus="true"
-                    field="fullName"
-                    icon-pack="fa"
-                    placeholder="e.g. John Doe"
-                    icon="search"
-                    @select="patient => serviceBooking.patient = patient">
-                    <template slot="empty">No results found</template>
-                  </b-autocomplete>
-                </b-field>
-              </div>
-              <div class="field has-text-centered appointment-buttons">
-                <a @click="createAppointment(serviceBooking)" class="button is-info">
-                  Create
-                </a>
-              </div>
-              <div class="has-text-danger has-text-centered" v-for="error in serviceBooking.errors">
-                {{ error }}
-              </div>
+            <b-field label="Patient">
+              <b-autocomplete
+                rounded
+                v-model="serviceBooking.patientName"
+                :data="filteredPatients"
+                :open-on-focus="true"
+                field="fullName"
+                icon-pack="fa"
+                placeholder="e.g. John Doe"
+                icon="search"
+                @select="patient => serviceBooking.patient = patient">
+                <template slot="empty">No results found</template>
+              </b-autocomplete>
+            </b-field>
+          </div>
+          <div class="field has-text-centered appointment-buttons">
+            <a @click="createAppointment(serviceBooking)" class="button is-info">
+              Create
+            </a>
+          </div>
+          <div class="has-text-danger has-text-centered" v-for="error in serviceBooking.errors">
+            {{ error }}
+          </div>
         </div><!-- /serviceBooking -->
         <!-- **********************************************************
              ****************** BOOK A BREAK SECTION **************
@@ -196,6 +240,10 @@
   import moment from 'moment-timezone'
   import { FullCalendar } from 'vue-full-calendar'
 
+  import "fullcalendar-scheduler";
+  import "fullcalendar/dist/fullcalendar.min.css";
+  import "fullcalendar-scheduler/dist/scheduler.min.css";
+
   // TODO: for the new appointment date picker, set unselectable-days-of-week (https://buefy.github.io/#/documentation/datepicker) to the days where the practitioner is not working
   // TODO: allow booking appointments for another practitioner
   // TODO: allow rescheduling for appointment. Right now practitioner must delete appt then re-create the new one.
@@ -211,8 +259,11 @@
     data() {
       let self = this;
       return {
+        practitionerFilterSelect : [],
+        practitionerFilterView : true,
         services: null,
         patients: null,
+        practitioners: null,
         soapNoteTemplate: null,
         serviceBooking: null,
         breakBooking: {
@@ -236,6 +287,7 @@
             firstDay: 1,
             editable: false,
             selectable: false,
+            groupByDateAndResource: true,
             // scrollTime: moment().startOf('hour').format("HH:mm:ss"),
             allDaySlot: false,
             businessHours: {
@@ -247,13 +299,47 @@
             minTime: '07:00:00',
             maxTime: '20:00:00',
             // Callbacks
-            // event handler for when an appointment is clicked in the calendar
+            // event handler for whenan appointment is clicked in the calendar
             eventClick(event, jsEvent, view) {
               let aptCpy = Object.assign({}, event);
               delete aptCpy.source // get rid of this, causes a circular reference error when trying to JSON.stringify
               self.selectedAppointment = aptCpy;
+            },
+            resources: function(callback, start, end, timezone) {
+              ApiService.get('/user').then(function(res) {
+                let resourceArray = [];
+                let filteredPractitioners = [];
+                if (typeof self !== 'undefined') {
+                  filteredPractitioners = res.data.result.filter(
+                    function(practitioner) {
+                      return (self.practitionerFilterSelect.findIndex(
+                        function (filteredPractitioner) {
+                          return practitioner.id === filteredPractitioner;
+                        }
+                      ) > -1);
+                    }
+                  );
+                }
+                else {
+                  console.log('self = ' + JSON.stringify(self));
+                  filteredPractitioners = self.$store.state.auth.user.id;
+                  console.log("filteredPractitioners = " + JSON.stringify(filteredPractitioners));
+                }
+                filteredPractitioners.forEach(function (practitioner) {
+                  resourceArray.push(
+                    {
+                      id: practitioner.id,
+                      title: practitioner.firstName + ' ' + practitioner.lastName,
+                    }
+                  );
+                });
+                console.log("formatted practitioners are:" + JSON.stringify(resourceArray));
+                callback(resourceArray);
+              }).catch(function(err) {
+                console.log(err);
+              });
             }
-          }
+          },
         },
       }
     },
@@ -281,6 +367,15 @@
             .indexOf(serviceSearchKey.toLowerCase()) >= 0
         })
       },
+      filteredPractitioners() {
+        return this.formattedPractitioners.filter((practitioner) => {
+          const searchKey = this.serviceBooking.practitionerName ? this.serviceBooking.practitionerName : "";
+          return (practitioner.fullName)
+            .toString()
+            .toLowerCase()
+            .indexOf(searchKey.toLowerCase()) >= 0
+        })
+      },
       filteredPatients() {
         return this.formattedPatients.filter((patient) => {
           const patientSearchKey = this.serviceBooking.patientName ? this.serviceBooking.patientName : ""
@@ -298,6 +393,14 @@
         })
 
         return patients
+      },
+      formattedPractitioners() {
+        let practitioners = this.practitioners.slice();
+
+        practitioners.forEach(p => {
+          p.fullName = p.firstName + " " + p.lastName;
+        });
+        return practitioners;
       },
       datePickerOptions() {
         return {
@@ -340,7 +443,8 @@
                     let event = {
                       title: appointment.serviceName ? appointment.serviceName : "Break",
                       start: moment.tz(appointment.startDateTime, appointment.timezone).format(),
-                      end: moment.tz(appointment.endDateTime, appointment.timezone).format()
+                      end: moment.tz(appointment.endDateTime, appointment.timezone).format(),
+                      resourceId : appointment.practitioner.id,
                     }
 
                     appointment.startDateTime = moment.tz(appointment.startDateTime, appointment.timezone),
@@ -351,7 +455,10 @@
                     event = Object.assign(event, appointment)
 
                     if (self.$store.state.auth.user.id !== appointment.practitioner.id) {
-                      event.color = '#d7d7d7';
+                      event.color = '#1A8CFF';
+                    }
+                    else {
+                      event.color = '#B833FF';
                     }
                     formattedAppts.push(event)
                   })
@@ -368,7 +475,10 @@
     created() {
       this.getServices()
       this.getPatients()
+      this.getPractitioners()
       this.getSoapNoteTemplates()
+      this.practitionerFilterSelect = []
+      this.practitionerFilterSelect.push(this.$store.state.auth.user.id);
     },
     watch: {
       'serviceBooking.date': function (newDate, oldDate) {
@@ -388,9 +498,40 @@
           }
         },
         deep: true
+      },
+      practitionerFilterSelect: {
+        handler: function (newPractitionerFilterSelect, oldPractitionerFilterSelect) {
+          this.refetchResources();
+        },
+        deep: true
       }
     },
     methods: {
+     /* dropOne(){
+        this.dropOneP = !this.dropOneP;
+      },*/
+      refetchResources() {
+        this.$refs.calendar.fireMethod('refetchResources');
+      },
+      getResources() {
+        let self = this;
+        self.resources = [];
+        ApiService.get('/user').then(function(res) {
+          console.log("practitioners are:" + JSON.stringify(res.data.result));
+          res.data.result.forEach(function (practitioner) {
+            self.resources.push(
+              {
+                id: practitioner.id,
+                title: practitioner.firstName + ' ' + practitioner.lastName,
+              }
+            );
+          });
+          console.log("formatted practitioners are:" + JSON.stringify(resources));
+          return self.resources;
+        }).catch(function(err) {
+          console.log(err);
+        });
+      },
       selectService(service) {
         if(!service) return
 
@@ -398,6 +539,12 @@
         if (this.serviceBooking.date) {
           this.findEmptySlots(moment(this.serviceBooking.date).format('YYYY-MM-DD'));
         }
+      },
+      selectPractitioner(practitioner) {
+        if(!practitioner)  {
+          return;
+        }
+        this.serviceBooking.practitioner = practitioner;
       },
       async updateSoapNote(soapNote) {
         const bodyParams = {
@@ -431,7 +578,14 @@
       getServices() {
         let self = this;
         ApiService.get('/service').then(res => self.services = res.data.result)
-          .catch(err => console.log(err))
+          .catch(err => console.log(err));
+      },
+      getPractitioners() {
+        let self = this;
+        ApiService.get('/user').then(function (res) {
+          self.practitioners = res.data.result;
+        })
+          .catch(err => console.log(err));
       },
       getPatients() {
         let self = this;
@@ -546,7 +700,7 @@
         // TODO: send email notification to patient & practitioner
         let self = this;
 
-        if (!self.serviceBooking.service || !self.serviceBooking.patient ||
+        if (!self.serviceBooking.service || !self.serviceBooking.practitioner || !self.serviceBooking.patient ||
             !self.serviceBooking.time || !self.serviceBooking.date) {
           // Do this because of Vue reactivity caveats
           // https://vuejs.org/v2/guide/reactivity.html#Declaring-Reactive-Properties
@@ -563,7 +717,7 @@
 
         let bodyParams = {
           serviceId: self.serviceBooking.service.id,
-          practitionerId: self.$store.state.auth.user.id,
+          practitionerId: self.serviceBooking.practitioner.id,
           startDateTime: startDateTime,
           patientId: self.serviceBooking.patient.id
         };
@@ -616,7 +770,7 @@
           params: {
             date: date,
             serviceId: self.serviceBooking.service.id,
-            practitionerId: self.$store.state.auth.user.id
+            practitionerId: self.serviceBooking.practitioner.id
           }
         })
           .then(function (response) {
@@ -679,4 +833,10 @@
 
 <style>
   @import 'fullcalendar/dist/fullcalendar.css';
+  .fc-view-container { overflow-x: scroll; }
+  .fc-view.fc-agendaDay-view.fc-agenda-view{ width: 100%; }
+  /* **For 2 day view** */
+  .fc-view.fc-agendaWeek-view.fc-agenda-view{  width: 500%; }
+  .fc-view.fc-agendaWeek-view.fc-agenda-view{  width: 500%; }
+  .fc-view.fc-month-view{  width: 500%; }
 </style>

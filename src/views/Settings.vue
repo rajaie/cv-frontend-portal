@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="container is-fluid">
-      <h1 class="title">Settings</h1>
+      <h1 class="title">User Preferences</h1>
       <div class="main">
         <!-- Type -->
         <nav class="panel column is-3 notifications">

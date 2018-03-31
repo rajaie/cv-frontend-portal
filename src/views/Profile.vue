@@ -129,7 +129,7 @@
           'oldPassword' : this.oldPassword,
           'newPassword' : this.newPassword,
         }
-        ApiService.put(
+        ApiService.patch(
           '/updatePassword/'+this.$store.state.auth.user.id,
           body
         ).then(function(response) {

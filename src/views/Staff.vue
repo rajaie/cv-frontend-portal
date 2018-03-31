@@ -154,7 +154,7 @@
           'firstName': this.selectedUser.firstName,
           'lastName': this.selectedUser.lastName,
         }
-        ApiService.put(
+        ApiService.patch(
           '/user/'+this.selectedUser.id,
           body).then(function(response) {
           self.$toast.open({

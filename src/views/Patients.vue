@@ -11,7 +11,7 @@
           <ul class="patient-list" >
             <li v-for="patient in patientList" class="patient">
             <span @click="selectPatient(patient.id)" class="patient-name">
-                {{patient.firstName}} {{patient.lastName}} (id: {{patient.id}})  <div class="fas fa-edit"></div>
+                {{patient.firstName}} {{patient.lastName}} <div class="fas fa-edit"></div>
               </span>
             </li>
           </ul>
@@ -36,7 +36,7 @@
                       <b-input v-model="selectedPatient.lastName"></b-input>
                     </b-field>
                     <b-field label="Email">
-                      <b-input v-model="selectedPatient.email" placeholder="Email" type="email"></b-input>
+                      <b-input v-model="selectedPatient.email" type="email"></b-input>
                     </b-field>
                     <b-field label="Mobile Number">
                       <b-input v-model="selectedPatient.mobileNumber"></b-input>
@@ -66,7 +66,7 @@
                       <b-input v-model="newPatient.lastName"></b-input>
                     </b-field>
                     <b-field label="Email">
-                      <b-input v-model="newPatient.email" placeholder="Email" type="email"></b-input>
+                      <b-input v-model="newPatient.email" type="email"></b-input>
                     </b-field>
                     <b-field label="Mobile Number">
                       <b-input v-model="newPatient.mobileNumber"></b-input>
@@ -110,7 +110,6 @@
     methods: {
       getPatients() {
         let self = this;
-        console.log("getting patients");
         ApiService.get('/patient', {
           params: {
             where : {
@@ -120,9 +119,8 @@
             sort: 'id ASC',
           }
         }).then(function(response) {
-          console.log('results = ' + JSON.stringify(response.data.result));
           self.patientList = response.data.result;
-        }).catch(err => console.log(err));
+        });
       },
       selectPatient(patientId) {
         const patient = this.patientList.find(u => u.id === patientId)
@@ -137,16 +135,15 @@
         ApiService.delete(
           '/patient/'+this.selectedPatient.id).then(function(response) {
           self.$toast.open({
-            message: 'Patient deleted successfully',
+            message: response.data.message,
             type: 'is-success',
             duration: 2000
           });
           self.getPatients();
           self.selectedPatient = null;
         }).catch(function (err) {
-          console.log("Error is:" + JSON.stringify(err));
           self.$toast.open({
-            message: 'Unable to delete patient',
+            message: err.response.data.message,
             type: 'is-danger',
             duration: 2000
           });
@@ -168,14 +165,13 @@
           body).then(function(response) {
           self.getPatients();
           self.$toast.open({
-            message: 'Patient updated successfully',
+            message: response.data.message,
             type: 'is-success',
             duration: 2000
           })
         }).catch(function (err) {
-          console.log("Error is:" + err);
           self.$toast.open({
-            message: 'Unable to update patient',
+            message: err.response.data.message,
             type: 'is-danger',
             duration: 2000
           })
@@ -197,7 +193,7 @@
           patientInfo
         ).then(function(response) {
           self.$toast.open({
-            message: 'New patient created successfully',
+            message: response.data.message,
             type: 'is-success',
             duration: 2000
           });
@@ -206,7 +202,7 @@
           self.selectedPatient = response.data.result;
         }).catch(function (err) {
           self.$toast.open({
-            message: 'Unable to create new patient',
+            message: err.response.data.message,
             type: 'is-danger',
             duration: 2000
           });

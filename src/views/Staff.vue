@@ -125,7 +125,6 @@
     methods: {
       getUserProfiles() {
         let self = this;
-        console.log("getting profiles");
         ApiService.get('/user', {
             params: {
               populate: "false",
@@ -137,9 +136,7 @@
           }
         ).then(function(response) {
           self.userList = response.data.result;
-        }).catch(function(err) {
-          console.log(err);
-        });
+        })
       },
       selectUser(userId) {
         const user = this.userList.find(u => u.id === userId)
@@ -163,12 +160,10 @@
             duration: 2000
           })
           if (self.$store.state.auth.user.id === self.selectedUser.id) {
-            self.$store.commit("login", response.data.result[0]);
+            self.$store.commit("setUser", response.data.result[0]);
           }
-          console.log("getting profiles");
           self.getUserProfiles();
         }).catch(function (err) {
-          console.log("Error is:" + err);
           self.$toast.open({
             message: 'Unable to update profile',
             type: 'is-danger',
@@ -205,7 +200,6 @@
           self.getUserProfiles();
           self.selectedUser = null;
         }).catch(function (err) {
-          console.log("Error is:" + JSON.stringify(err));
           self.$toast.open({
             message: 'Unable to delete profile',
             type: 'is-danger',
@@ -262,7 +256,6 @@
         this.newUser = {'role' : 'practitioner'};
       },
       comparePasswords() {
-        console.log("comparing passwords");
         if (this.newUser.password === this.newUser.passwordConfirmation) {
           this.passwordsMatch = true;
         }

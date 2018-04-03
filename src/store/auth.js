@@ -36,7 +36,7 @@ export default {
       state.user = user;
     },
     setClinic(state, clinic) {
-      localStorage.user = JSON.stringify(clinic)
+      localStorage.clinic = JSON.stringify(clinic)
       state.clinic = clinic;
     }
   },

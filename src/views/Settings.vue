@@ -46,7 +46,7 @@
           <label class="panel-block settings-option">
             <input v-model="userSettings.appointmentReminderNotifications" type="checkbox">
             Appointment Reminders
-            <b-tooltip label="Get an appointment reminder 24 hours before your appointment"
+            <b-tooltip label="Get a reminder 24 hours before meeting your patient"
                        position="is-right">
               <span class="icon"><i class="fas fa-info-circle"></i></span>
             </b-tooltip>

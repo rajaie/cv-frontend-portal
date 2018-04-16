@@ -1,49 +1,42 @@
 <template>
   <div><div class="container is-fluid">
-    <h1 class="title">
-      Appointments
-      <a @click="startAppointmentDraft" title='Create a new appointment'>
-        <button class="fas fa-plus-circle fa-xs"></button>
-      </a>
-    </h1>
-    {{practitionerFilterSelect}}
     <div class="columns is-multiline">
-      <div v-if="practitionerFilterView" class="column is-2">
-        <div class="practitioner filter">
-          <h2 class="subtitle left-align">Practitioners</h2>
-          <a @click="practitionerFilterView=false" class="right-align"><i class="fas fa-chevron-circle-left"></i></a>
-          <section>
-              <b-checkbox v-for="practitioner in practitioners"  v-model="practitionerFilterSelect" :key="practitioner.id"
-                :native-value="practitioner.id">
-                {{practitioner.firstName}} {{practitioner.lastName}}
-              </b-checkbox>
-          </section>
-        </div>
-      </div>
-      <div v-else class="column is-1">
-        <div class="practitioner filter">
-          <h2 class="subtitle left-align"></h2>
-          <a @click="practitionerFilterView=true" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
-        </div>
-      </div>
       <div class="column">
         <div class="practitioner-dropdown">
-          <nav class="navbar">
+          <nav class="navbar fc-toolbar fc-header-toolbar">
             <div class="navbar-brand">
-              <b-dropdown>
-                <a class="navbar-item" slot="trigger">
-                  <span>Practitioners</span>
-                  <b-icon icon="menu-down"></b-icon>
+              <div class="navbar-item">
+                <a @click="startAppointmentDraft" title='Create a new appointment'>
+                  <button class="fas fa-plus-circle fa-2x"></button>
                 </a>
+              </div>
+              <b-dropdown class="navbar-item is-left" hoverable>
+                <button type="button" class="button fc-button fc-state-default fc-corner-right" slot="trigger">
+                  <span>Practitioners</span>
+                  <span class="icon is-small">
+                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                  </span>
+                </button>
+
+                <b-dropdown-item v-for="practitioner in practitioners" :key="practitioner.id">
+                  <b-checkbox v-model="practitionerFilterSelect" :native-value="practitioner.id">
+                    {{practitioner.firstName}} {{practitioner.lastName}}
+                  </b-checkbox>
+                </b-dropdown-item>
               </b-dropdown>
             </div>
           </nav>
         </div>
-        <full-calendar ref="calendar"
-                       :event-sources="eventSources"
-                       :header="calendarOptions.header"
-                       :config="calendarOptions.config">
-        </full-calendar>
+        <div :class=calendarWidthClass>
+          <full-calendar
+            ref="calendar"
+            :event-sources="eventSources"
+            :header="calendarOptions.header"
+            :config="calendarOptions.config"
+            :style="{}"
+          >
+          </full-calendar>
+        </div>
       </div>
       <!-- **********************************************************
            ******************* SOAP NOTES SECTION *******************
@@ -243,6 +236,7 @@
   import "fullcalendar-scheduler";
   import "fullcalendar/dist/fullcalendar.min.css";
   import "fullcalendar-scheduler/dist/scheduler.min.css";
+  import config from "../config/config";
 
   // TODO: for the new appointment date picker, set unselectable-days-of-week (https://buefy.github.io/#/documentation/datepicker) to the days where the practitioner is not working
   // TODO: allow booking appointments for another practitioner
@@ -259,8 +253,9 @@
     data() {
       let self = this;
       return {
-        practitionerFilterSelect : [],
-        practitionerFilterView : true,
+        calendarViewName: "",
+        practitionerFilterSelect: [],
+        practitionerFilterView: true,
         services: null,
         patients: null,
         practitioners: null,
@@ -280,14 +275,22 @@
           header: {
             left: 'prev,next today',
             center: 'title',
-            right:"month,agendaWeek,agendaDay,listWeek"
+            right:"agendaDay,agendaWeek,month,listWeek"
           },
           config: {
+            views : {
+              agenda: {
+                groupByDateAndResource: true
+              },
+            },
             nowIndicator: true,
             firstDay: 1,
             editable: false,
             selectable: false,
-            groupByDateAndResource: true,
+            groupByDateAndResource: false,
+            defaultView: 'agendaDay',
+            height: 900,
+            //groupByDateAndResource: true,
             // scrollTime: moment().startOf('hour').format("HH:mm:ss"),
             allDaySlot: false,
             businessHours: {
@@ -299,11 +302,14 @@
             minTime: '07:00:00',
             maxTime: '20:00:00',
             // Callbacks
-            // event handler for whenan appointment is clicked in the calendar
+            // event handler for when appointment is clicked in the calendar
             eventClick(event, jsEvent, view) {
               let aptCpy = Object.assign({}, event);
               delete aptCpy.source // get rid of this, causes a circular reference error when trying to JSON.stringify
               self.selectedAppointment = aptCpy;
+            },
+            viewRender(view, element) {
+              self.calendarViewName = view.name;
             },
             resources: function(callback, start, end, timezone) {
               ApiService.get('/user').then(function(res) {
@@ -321,9 +327,7 @@
                   );
                 }
                 else {
-                  console.log('self = ' + JSON.stringify(self));
                   filteredPractitioners = self.$store.state.auth.user.id;
-                  console.log("filteredPractitioners = " + JSON.stringify(filteredPractitioners));
                 }
                 filteredPractitioners.forEach(function (practitioner) {
                   resourceArray.push(
@@ -344,6 +348,17 @@
       }
     },
     computed: {
+      calendarWidthClass() {
+        let numDays = 1;
+        if (this.calendarViewName == "agendaWeek") {
+          numDays = 7;
+        }
+
+        let ratio = this.practitionerFilterSelect.length*numDays/14;
+        let widthMultiplier = ratio <= 10 ? Math.ceil(ratio) : 10;
+
+        return "calendar-" + widthMultiplier + "x";
+      },
       breakDurations() {
         // TODO: get practitioner's availabilities, and set max break length to their longest working day's hours.
         const CHUNK_SIZE_MINUTES = 15;
@@ -501,6 +516,7 @@
       },
       practitionerFilterSelect: {
         handler: function (newPractitionerFilterSelect, oldPractitionerFilterSelect) {
+          console.log("refetching resources")
           this.refetchResources();
         },
         deep: true
@@ -829,14 +845,36 @@
       margin-top: 1rem;
     }
   }
+  div .dropdown.navbar-item {
+    padding-left : 0;
+  }
+
 </style>
 
 <style>
   @import 'fullcalendar/dist/fullcalendar.css';
-  .fc-view-container { overflow-x: scroll; }
+  .fc-view-container {
+    overflow-x: auto;
+    border : 1px solid gray;
+  }
+  .calendar-1x .fc-agendaDay-view, .calendar-1x .fc-agendaWeek-view{ width: 100%; }
+  .calendar-2x .fc-agendaDay-view, .calendar-2x .fc-agendaWeek-view{ width: 200%; }
+  .calendar-3x .fc-agendaDay-view, .calendar-3x .fc-agendaWeek-view{ width: 300%; }
+  .calendar-4x .fc-agendaDay-view, .calendar-4x .fc-agendaWeek-view{ width: 400%; }
+  .calendar-5x .fc-agendaDay-view, .calendar-5x .fc-agendaWeek-view{ width: 500%; }
+  .calendar-6x .fc-agendaDay-view, .calendar-6x .fc-agendaWeek-view{ width: 600%; }
+  .calendar-7x .fc-agendaDay-view, .calendar-7x .fc-agendaWeek-view{ width: 700%; }
+  .calendar-8x .fc-agendaDay-view, .calendar-8x .fc-agendaWeek-view{ width: 800%; }
+  .calendar-9x .fc-agendaDay-view, .calendar-9x .fc-agendaWeek-view{ width: 900%; }
+  .calendar-10x .fc-agendaDay-view, .calendar-10x .fc-agendaWeek-view{ width: 1000%; }
+  /*                                      600
   .fc-view.fc-agendaDay-view.fc-agenda-view{ width: 100%; }
-  /* **For 2 day view** */
   .fc-view.fc-agendaWeek-view.fc-agenda-view{  width: 500%; }
   .fc-view.fc-agendaWeek-view.fc-agenda-view{  width: 500%; }
   .fc-view.fc-month-view{  width: 500%; }
+  .fc-view.fc-agendaDay-view.fc-agenda-view th {
+    width:200px;
+  }
+  .fc-agenda-view{ height: 30%; }
+  */
 </style>

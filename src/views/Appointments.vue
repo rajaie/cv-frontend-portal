@@ -98,34 +98,96 @@
         <!-- **********************************************************
              ****************** BOOK A SERVICE SECTION **************
              ********************************************************** -->
-        <div class="service-booking">
+        <div v-if="serviceBooking.mode=='calendarSearch'">
           <h2 class="subtitle left-align">New Appointment</h2>
           <a @click="serviceBooking=undefined" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
           <div class="clear"></div>
           <div class="appointment-details-content">
             <b-field label="Service">
               <b-autocomplete rounded
-                v-model="serviceBooking.serviceName"
-                :data="filteredServices"
-                :open-on-focus="true"
-                field="name"
+                              v-model="serviceBooking.serviceName"
+                              :data="serviceBooking.practitioner.services"
+                              :open-on-focus="true"
+                              field="name"
+                              icon-pack="fa"
+                              placeholder="e.g. Massage"
+                              icon="search"
+                              @select="selectService">
+                <template slot="empty">No results found</template>
+              </b-autocomplete>
+            </b-field>
+            <b-field label="Practitioner">
+              <b-input disabled v-model="serviceBooking.practitionerName"></b-input>
+            </b-field>
+            <b-field label="Date">
+              <b-datepicker
+                placeholder="Click to select..."
+                icon="calendar-alt"
                 icon-pack="fa"
-                placeholder="e.g. Massage"
+                v-model="serviceBooking.date"
+                :min-date="datePickerOptions.minDate"
+                :date-formatter="datePickerOptions.dateFormatter"
+                :first-day-of-week=1
+                position="is-bottom-left"
+                disabled>
+              </b-datepicker>
+            </b-field>
+            <b-field label="Start Time">
+              <b-input disabled v-model="serviceBooking.time"></b-input>
+            </b-field>
+
+            <b-field label="Patient">
+              <b-autocomplete
+                rounded
+                v-model="serviceBooking.patientName"
+                :data="filteredPatients"
+                :open-on-focus="true"
+                field="fullName"
+                icon-pack="fa"
+                placeholder="e.g. John Doe"
                 icon="search"
-                @select="selectService">
+                @select="patient => serviceBooking.patient = patient">
+                <template slot="empty">No results found</template>
+              </b-autocomplete>
+            </b-field>
+          </div>
+          <div class="field has-text-centered appointment-buttons">
+            <a @click="createAppointment(serviceBooking)" class="button is-info">
+              Create
+            </a>
+          </div>
+          <div class="has-text-danger has-text-centered" v-for="error in serviceBooking.errors">
+            {{ error }}
+          </div>
+        </div><!-- /serviceBooking -->
+        <div v-else>
+          <h2 class="subtitle left-align">New Appointment</h2>
+          <a @click="serviceBooking=undefined" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
+          <div class="clear"></div>
+          <div class="appointment-details-content">
+            <b-field label="Service">
+              <b-autocomplete rounded
+                              v-model="serviceBooking.serviceName"
+                              :data="filteredServices"
+                              :open-on-focus="true"
+                              field="name"
+                              icon-pack="fa"
+                              placeholder="e.g. Massage"
+                              icon="search"
+                              @select="selectService">
                 <template slot="empty">No results found</template>
               </b-autocomplete>
             </b-field>
             <b-field label="Practitioner">
               <b-autocomplete rounded
-                v-model="serviceBooking.practitionerName"
-                :data="filteredPractitioners"
-                :open-on-focus="true"
-                field="fullName"
-                icon-pack="fa"
-                placeholder="e.g. James Ali"
-                icon="search"
-                @select="selectPractitioner">
+                              v-model="serviceBooking.practitionerName"
+                              :data="filteredPractitioners"
+                              :open-on-focus="true"
+                              field="fullName"
+                              icon-pack="fa"
+                              placeholder="e.g. James Ali"
+                              icon="search"
+                              @select="selectPractitioner">
                 <template slot="empty">No results found</template>
               </b-autocomplete>
             </b-field>
@@ -143,7 +205,7 @@
             </b-field>
             <b-field label="Start Time">
               <b-select placeholder="Select a time"
-                        :disabled="serviceBooking.date === undefined || serviceBooking.practitioner === undefined || serviceBooking.service === undefined"
+                        :disabled="serviceBooking.date === undefined || serviceBooking.practitioner === undefined"
                         v-model="serviceBooking.time">
                 <option v-for="time in availableSlots"
                         :value="time">
@@ -175,7 +237,7 @@
           <div class="has-text-danger has-text-centered" v-for="error in serviceBooking.errors">
             {{ error }}
           </div>
-        </div><!-- /serviceBooking -->
+        </div>
         <!-- **********************************************************
              ****************** BOOK A BREAK SECTION **************
              ********************************************************** -->
@@ -237,7 +299,7 @@
   import "fullcalendar/dist/fullcalendar.min.css";
   import "fullcalendar-scheduler/dist/scheduler.min.css";
   import config from "../config/config";
-
+  var _  = require('underscore');
   // TODO: for the new appointment date picker, set unselectable-days-of-week (https://buefy.github.io/#/documentation/datepicker) to the days where the practitioner is not working
   // TODO: allow booking appointments for another practitioner
   // TODO: allow rescheduling for appointment. Right now practitioner must delete appt then re-create the new one.
@@ -286,7 +348,10 @@
             nowIndicator: true,
             firstDay: 1,
             editable: false,
-            selectable: false,
+            selectable: true,
+            selectHelper: true,
+            selectOverlap: false,
+            unselectAuto: false,
             groupByDateAndResource: false,
             defaultView: 'agendaDay',
             height: 900,
@@ -303,6 +368,22 @@
             maxTime: '20:00:00',
             // Callbacks
             // event handler for when appointment is clicked in the calendar
+
+            select(start, end, event, view, resource){
+              let practitioner = self.formattedPractitioners.find(function(element) {
+                return element.id == resource.id;
+              })
+              self.serviceBooking = {
+                practitioner: practitioner,
+                practitionerName: practitioner.fullName,
+                time: moment.tz(start, event.timezone).format("hh:mm A"),
+                date: moment.tz(start, event.timezone).toDate(),
+                mode: 'calendarSearch',
+                //v-model="serviceBooking.time">
+                //v-model="serviceBooking.date"
+              };
+              console.log("self.serviceBooking = " + JSON.stringify(self.serviceBooking));
+            },
             eventClick(event, jsEvent, view) {
               let aptCpy = Object.assign({}, event);
               delete aptCpy.source // get rid of this, causes a circular reference error when trying to JSON.stringify
@@ -315,9 +396,7 @@
               ApiService.get('/user').then(function(res) {
                 let resourceArray = [];
                 let filteredPractitioners = [];
-                if (typeof self !== 'undefined') {
-                  filteredPractitioners = res.data.result.filter(
-                    function(practitioner) {
+                if (typeof self !== 'undefined') { filteredPractitioners = res.data.result.filter( function(practitioner) {
                       return (self.practitionerFilterSelect.findIndex(
                         function (filteredPractitioner) {
                           return practitioner.id === filteredPractitioner;
@@ -453,8 +532,67 @@
               )
                 .then(res => {
                   let formattedAppts = []
-                  res.data.result.forEach(function(appointment) {
+                  for (let j = 0; j < self.practitioners.length; ++j) {
+                    let practitioner = self.practitioners[j];
+                    // Full Calendar identifies Sunday as day 0 while moment treats Sunday as 7
+                    // All other days are the same between the two
+                    let practitionerAvailabilities = practitioner.availabilities.map(function (availability) {
+                      if (availability.day === 7) {
+                        availability.day = 0;
+                      }
+                      return availability;
+                    });
+                    for (let i = 0; i < practitionerAvailabilities.length; ++i) {
+                      let availabilityDay = practitionerAvailabilities[i];
+                      console.log('availabilityDay = ' + JSON.stringify(availabilityDay));
+                      formattedAppts.push(
+                        {
+                          title: 'not available',
+                          dow : [availabilityDay.day],
+                          start: '00:00',
+                          end: moment(availabilityDay.from, "hh:mm A", true).format('HH:mm'),
+                          resourceId: practitioner.id,
+                          rendering: 'background',
+                          backgroundColor: '#808080',
+                        }
+                      );
+                      formattedAppts.push(
+                        {
+                          title: 'not available',
+                          dow : [availabilityDay.day],
+                          start: moment(availabilityDay.to, "hh:mm A", true).format('HH:mm'),
+                          end: '23:59',
+                          resourceId: practitioner.id,
+                          rendering: 'background',
+                          backgroundColor: '#808080',
+                        }
+                      );
+                    }
+                    let daysWithoutAvailability = _.range(0,7).filter((day) => {
+                      console.log("working on day: "+ day);
+                      return (!practitionerAvailabilities.find(function(availabilityDay) {
+                        console.log('-- found availability.day =' + availabilityDay.day);
+                        return availabilityDay.day === day;
+                      }));
+                    });
 
+                    daysWithoutAvailability.forEach((day) => {
+                      console.log("day = " + day);
+                      formattedAppts.push(
+                        {
+                          title: 'not available',
+                          dow : [day],
+                          start: '00:00',
+                          end: '23:59',
+                          resourceId: practitioner.id,
+                          rendering: 'background',
+                          backgroundColor: '#808080',
+                        }
+                      );
+                    });
+                  }
+
+                  res.data.result.forEach(function(appointment) {
                     let event = {
                       title: appointment.serviceName ? appointment.serviceName : "Break",
                       start: moment.tz(appointment.startDateTime, appointment.timezone).format(),
@@ -476,7 +614,8 @@
                       event.color = '#B833FF';
                     }
                     formattedAppts.push(event)
-                  })
+                  });
+                  console.log('formattedAppts = ' + JSON.stringify(formattedAppts));
                   callback(formattedAppts)
                 })
                 .catch(err => console.log(err))
@@ -501,8 +640,8 @@
         console.log(newDate);
         console.log(oldDate);
 
-        if (serviceBooking && serviceBooking.service) {
-          this.findEmptySlots(moment(newDate).format('YYYY-MM-DD'));
+        if (serviceBooking) {
+          //this.findEmptySlots(moment(newDate).format('YYYY-MM-DD'));
         }
       },
       breakBooking: {
@@ -526,6 +665,15 @@
      /* dropOne(){
         this.dropOneP = !this.dropOneP;
       },*/
+      filteredServices(services) {
+        return services.filter((service) => {
+          const serviceSearchKey = this.serviceBooking.serviceName ? this.serviceBooking.serviceName : ""
+          return service.name
+            .toString()
+            .toLowerCase()
+            .indexOf(serviceSearchKey.toLowerCase()) >= 0
+        })
+      },
       refetchResources() {
         this.$refs.calendar.fireMethod('refetchResources');
       },
@@ -713,6 +861,7 @@
         }
       },
       async createAppointment(appointment) {
+        console.log("createAppointment = " + JSON.stringify(appointment));
         // TODO: send email notification to patient & practitioner
         let self = this;
 
@@ -752,6 +901,7 @@
             type: 'is-success',
             duration: 2000
           })
+          self.$refs.calendar.fireMethod('unselect');
           self.$refs.calendar.$emit('refetch-events')
         }).catch(function (reason) {
           console.log(reason);
@@ -782,12 +932,17 @@
         // TODO: display a disabled option if no timings available on that day
         console.log("Finding empty slots")
         const self = this;
+        let params = {
+          date: date,
+          practitionerId: self.serviceBooking.practitioner.id
+        }
+
+        if (self.serviceBooking.service) {
+          params.serviceId = self.serviceBooking.service.id;
+        }
+
         ApiService.get(`/findEmptySlots`, {
-          params: {
-            date: date,
-            serviceId: self.serviceBooking.service.id,
-            practitionerId: self.serviceBooking.practitioner.id
-          }
+          params: params
         })
           .then(function (response) {
             const times = response.data.result;

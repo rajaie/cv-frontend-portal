@@ -388,6 +388,15 @@
 
             },
             select(start, end, event, view, resource){
+              if (start.isBefore(moment())) {
+                self.$toast.open({
+                  message: 'Cannot create appointment in the past',
+                  type: 'is-warning',
+                  duration: 1500
+                })
+                this.$refs.calendar.fireMethod('unselect');
+                return;
+              }
               let practitioner = self.formattedPractitioners.find(function(element) {
                 return element.id == resource.id;
               })
@@ -1037,9 +1046,11 @@
   @import 'https://fullcalendar.io/releases/fullcalendar/3.9.0/fullcalendar.min.css';
   @import 'https://fullcalendar.io/releases/fullcalendar-scheduler/1.9.4/scheduler.min.css';
   .fc-timelineWeek-view .fc-timeline-event, .fc-timelineDay-view .fc-timeline-event {
-    height: 60px;
-    margin-bottom: 0px;
-    margin-top: 0px;
+    height: 58px;
+    margin-bottom: 1px;
+    margin-top: 1px;
+    border: thick black !important;
+    border-style: solid;
     padding-bottom: 0px;
     padding-top: 0px;
   }

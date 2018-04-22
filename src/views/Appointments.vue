@@ -337,13 +337,16 @@
           header: {
             left: 'prev,next today',
             center: 'title',
-            right:"agendaDay,agendaWeek,month,listWeek"
+            right:"timelineDay,timelineWeek,month,listWeek"
           },
           config: {
             views : {
-              agenda: {
-                groupByDateAndResource: true
+              timelineDay: {
+                groupByDateAndResource: true,
               },
+              timelineWeek: {
+                groupByDateAndResource: true,
+              }
             },
             nowIndicator: true,
             firstDay: 1,
@@ -353,8 +356,9 @@
             selectOverlap: false,
             unselectAuto: false,
             groupByDateAndResource: false,
-            defaultView: 'agendaDay',
-            height: 900,
+            defaultView: 'timelineDay',
+            resourceAreaWidth: "10rem",
+            height: 800,
             //groupByDateAndResource: true,
             // scrollTime: moment().startOf('hour').format("HH:mm:ss"),
             allDaySlot: false,
@@ -364,11 +368,25 @@
               end: '20:00'
             },
             slotDuration: '00:15:00',
-            minTime: '07:00:00',
+            minTime: '08:00:00',
             maxTime: '20:00:00',
             // Callbacks
             // event handler for when appointment is clicked in the calendar
+            dayRender(date, cell) {
+              console.log('date = ' + date);
+              console.log('moment(0) : ' + moment(0));
+              let numDaysSinceEpoch = date.diff(moment(0), 'days');
+              console.log("numDaysSinceEpoch= " + numDaysSinceEpoch);
+              console.log("numDaysSinceEpoch % 2 = " + numDaysSinceEpoch % 2);
+              if (numDaysSinceEpoch % 2 == 0) {
+                cell.css("background-color", "#FDFEFE");
+              }
+              else {
+                cell.css("background-color", "#F8FCFC");
+              }
+              //cell.css("background-color", "red");
 
+            },
             select(start, end, event, view, resource){
               let practitioner = self.formattedPractitioners.find(function(element) {
                 return element.id == resource.id;
@@ -382,12 +400,14 @@
                 //v-model="serviceBooking.time">
                 //v-model="serviceBooking.date"
               };
-              console.log("self.serviceBooking = " + JSON.stringify(self.serviceBooking));
+              self.selectedAppointment = null;
+              //console.log("self.serviceBooking = " + JSON.stringify(self.serviceBooking));
             },
             eventClick(event, jsEvent, view) {
               let aptCpy = Object.assign({}, event);
               delete aptCpy.source // get rid of this, causes a circular reference error when trying to JSON.stringify
               self.selectedAppointment = aptCpy;
+              self.serviceBooking = null;
             },
             viewRender(view, element) {
               self.calendarViewName = view.name;
@@ -406,7 +426,7 @@
                   );
                 }
                 else {
-                  filteredPractitioners = self.$store.state.auth.user.id;
+                  filteredPractitioners = [self.$store.state.auth.user.id];
                 }
                 filteredPractitioners.forEach(function (practitioner) {
                   resourceArray.push(
@@ -416,7 +436,12 @@
                     }
                   );
                 });
-                console.log("formatted practitioners are:" + JSON.stringify(resourceArray));
+
+                for (let i =0; i <10; ++i){
+                  let name = 'l' + i;
+                  resourceArray.push({id:name, title:name});
+                }
+                //console.log("formatted practitioners are:" + JSON.stringify(resourceArray));
                 callback(resourceArray);
               }).catch(function(err) {
                 console.log(err);
@@ -428,8 +453,9 @@
     },
     computed: {
       calendarWidthClass() {
+        return "bam";
         let numDays = 1;
-        if (this.calendarViewName == "agendaWeek") {
+        if (this.calendarViewName == "timelineWeek") {
           numDays = 7;
         }
 
@@ -544,7 +570,7 @@
                     });
                     for (let i = 0; i < practitionerAvailabilities.length; ++i) {
                       let availabilityDay = practitionerAvailabilities[i];
-                      console.log('availabilityDay = ' + JSON.stringify(availabilityDay));
+                      //console.log('availabilityDay = ' + JSON.stringify(availabilityDay));
                       formattedAppts.push(
                         {
                           title: 'not available',
@@ -569,15 +595,15 @@
                       );
                     }
                     let daysWithoutAvailability = _.range(0,7).filter((day) => {
-                      console.log("working on day: "+ day);
+                      //console.log("working on day: "+ day);
                       return (!practitionerAvailabilities.find(function(availabilityDay) {
-                        console.log('-- found availability.day =' + availabilityDay.day);
+                        //console.log('-- found availability.day =' + availabilityDay.day);
                         return availabilityDay.day === day;
                       }));
                     });
 
                     daysWithoutAvailability.forEach((day) => {
-                      console.log("day = " + day);
+                      //console.log("day = " + day);
                       formattedAppts.push(
                         {
                           title: 'not available',
@@ -615,7 +641,7 @@
                     }
                     formattedAppts.push(event)
                   });
-                  console.log('formattedAppts = ' + JSON.stringify(formattedAppts));
+                  //console.log('formattedAppts = ' + JSON.stringify(formattedAppts));
                   callback(formattedAppts)
                 })
                 .catch(err => console.log(err))
@@ -637,8 +663,8 @@
     watch: {
       'serviceBooking.date': function (newDate, oldDate) {
         const serviceBooking = this.serviceBooking
-        console.log(newDate);
-        console.log(oldDate);
+        //console.log(newDate);
+        //console.log(oldDate);
 
         if (serviceBooking) {
           //this.findEmptySlots(moment(newDate).format('YYYY-MM-DD'));
@@ -655,7 +681,7 @@
       },
       practitionerFilterSelect: {
         handler: function (newPractitionerFilterSelect, oldPractitionerFilterSelect) {
-          console.log("refetching resources")
+          //console.log("refetching resources")
           this.refetchResources();
         },
         deep: true
@@ -681,7 +707,7 @@
         let self = this;
         self.resources = [];
         ApiService.get('/user').then(function(res) {
-          console.log("practitioners are:" + JSON.stringify(res.data.result));
+          //console.log("practitioners are:" + JSON.stringify(res.data.result));
           res.data.result.forEach(function (practitioner) {
             self.resources.push(
               {
@@ -690,7 +716,7 @@
               }
             );
           });
-          console.log("formatted practitioners are:" + JSON.stringify(resources));
+          //console.log("formatted practitioners are:" + JSON.stringify(resources));
           return self.resources;
         }).catch(function(err) {
           console.log(err);
@@ -758,7 +784,8 @@
       },
       startAppointmentDraft() {
         console.log("Starting new draft appointment")
-        this.serviceBooking = {}
+        this.serviceBooking = {};
+        this.selectedAppointment = null;
       },
       async createBreak(booking) {
         console.log("Booking break;")
@@ -1007,29 +1034,41 @@
 </style>
 
 <style>
-  @import 'fullcalendar/dist/fullcalendar.css';
-  .fc-view-container {
-    overflow-x: auto;
-    border : 1px solid gray;
+  @import 'https://fullcalendar.io/releases/fullcalendar/3.9.0/fullcalendar.min.css';
+  @import 'https://fullcalendar.io/releases/fullcalendar-scheduler/1.9.4/scheduler.min.css';
+  .fc-timelineWeek-view .fc-timeline-event, .fc-timelineDay-view .fc-timeline-event {
+    height: 60px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    padding-bottom: 0px;
+    padding-top: 0px;
   }
-  .calendar-1x .fc-agendaDay-view, .calendar-1x .fc-agendaWeek-view{ width: 100%; }
-  .calendar-2x .fc-agendaDay-view, .calendar-2x .fc-agendaWeek-view{ width: 200%; }
-  .calendar-3x .fc-agendaDay-view, .calendar-3x .fc-agendaWeek-view{ width: 300%; }
-  .calendar-4x .fc-agendaDay-view, .calendar-4x .fc-agendaWeek-view{ width: 400%; }
-  .calendar-5x .fc-agendaDay-view, .calendar-5x .fc-agendaWeek-view{ width: 500%; }
-  .calendar-6x .fc-agendaDay-view, .calendar-6x .fc-agendaWeek-view{ width: 600%; }
-  .calendar-7x .fc-agendaDay-view, .calendar-7x .fc-agendaWeek-view{ width: 700%; }
-  .calendar-8x .fc-agendaDay-view, .calendar-8x .fc-agendaWeek-view{ width: 800%; }
-  .calendar-9x .fc-agendaDay-view, .calendar-9x .fc-agendaWeek-view{ width: 900%; }
-  .calendar-10x .fc-agendaDay-view, .calendar-10x .fc-agendaWeek-view{ width: 1000%; }
-  /*                                      600
-  .fc-view.fc-agendaDay-view.fc-agenda-view{ width: 100%; }
-  .fc-view.fc-agendaWeek-view.fc-agenda-view{  width: 500%; }
-  .fc-view.fc-agendaWeek-view.fc-agenda-view{  width: 500%; }
-  .fc-view.fc-month-view{  width: 500%; }
-  .fc-view.fc-agendaDay-view.fc-agenda-view th {
-    width:200px;
+  .fc-timelineWeek-view .fc-widget-content .fc-content .fc-title,
+  .fc-timelineDay-view .fc-widget-content .fc-content .fc-title {
+    white-space : normal;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: normal;
   }
-  .fc-agenda-view{ height: 30%; }
-  */
+
+  .fc-timelineWeek-view .fc-widget-content .fc-content,
+  .fc-timelineDay-view .fc-widget-content .fc-content {
+    line-height: 60px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .fc-timelineWeek-view .fc-widget-content .fc-cell-content,
+  .fc-timelineDay-view .fc-widget-content .fc-cell-content {
+    padding-top: 0px ;
+    padding-bottom: 0px !important;
+  }
+  .fc-timelineWeek-view .fc-widget-content .fc-rows div,
+  .fc-timelineDay-view .fc-widget-content .fc-rows div {
+    height: 60px !important;
+  }
+  .fc-timelineWeek-view .fc-widget-content .fc-rows table tbody tr,
+  .fc-timelineDay-view .fc-widget-content .fc-rows table tbody tr {
+    height:60px;
+  }
 </style>

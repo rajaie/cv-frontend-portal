@@ -152,7 +152,7 @@
             </b-field>
           </div>
           <div class="field has-text-centered appointment-buttons">
-            <a @click="createAppointment(serviceBooking)" class="button is-info">
+            <a @click="createAppointment" class="button is-info">
               Create
             </a>
           </div>
@@ -230,7 +230,7 @@
             </b-field>
           </div>
           <div class="field has-text-centered appointment-buttons">
-            <a @click="createAppointment(serviceBooking)" class="button is-info">
+            <a @click="createAppointment" class="button is-info">
               Create
             </a>
           </div>
@@ -387,14 +387,32 @@
               //cell.css("background-color", "red");
 
             },
+            dayClick(date, event, view, resource){
+              if (view.name !== "month") {
+                return;
+              }
+              if (date.isBefore(moment())) {
+                self.$toast.open({
+                  message: 'Cannot create appointment in the past',
+                  type: 'is-warning',
+                  duration: 1500
+                })
+                return;
+              }
+              self.serviceBooking = {
+                date: moment.tz(date, event.timezone).toDate(),
+              };
+              self.selectedAppointment = null;
+            },
             select(start, end, event, view, resource){
+              console.log("select called");
               if (start.isBefore(moment())) {
                 self.$toast.open({
                   message: 'Cannot create appointment in the past',
                   type: 'is-warning',
                   duration: 1500
                 })
-                this.$refs.calendar.fireMethod('unselect');
+                self.$refs.calendar.fireMethod('unselect');
                 return;
               }
               let practitioner = self.formattedPractitioners.find(function(element) {
@@ -406,8 +424,6 @@
                 time: moment.tz(start, event.timezone).format("hh:mm A"),
                 date: moment.tz(start, event.timezone).toDate(),
                 mode: 'calendarSearch',
-                //v-model="serviceBooking.time">
-                //v-model="serviceBooking.date"
               };
               self.selectedAppointment = null;
               //console.log("self.serviceBooking = " + JSON.stringify(self.serviceBooking));
@@ -446,10 +462,6 @@
                   );
                 });
 
-                for (let i =0; i <10; ++i){
-                  let name = 'l' + i;
-                  resourceArray.push({id:name, title:name});
-                }
                 //console.log("formatted practitioners are:" + JSON.stringify(resourceArray));
                 callback(resourceArray);
               }).catch(function(err) {
@@ -675,8 +687,8 @@
         //console.log(newDate);
         //console.log(oldDate);
 
-        if (serviceBooking) {
-          //this.findEmptySlots(moment(newDate).format('YYYY-MM-DD'));
+        if (serviceBooking && serviceBooking.practitioner && serviceBooking.service) {
+          this.findEmptySlots(moment(newDate).format('YYYY-MM-DD'));
         }
       },
       breakBooking: {
@@ -735,7 +747,7 @@
         if(!service) return
 
         this.serviceBooking.service = service
-        if (this.serviceBooking.date) {
+        if (this.serviceBooking.practitionerId && this.serviceBooking.date) {
           this.findEmptySlots(moment(this.serviceBooking.date).format('YYYY-MM-DD'));
         }
       },
@@ -896,8 +908,7 @@
           console.log(e)
         }
       },
-      async createAppointment(appointment) {
-        console.log("createAppointment = " + JSON.stringify(appointment));
+      async createAppointment() {
         // TODO: send email notification to patient & practitioner
         let self = this;
 
@@ -940,6 +951,11 @@
           self.$refs.calendar.fireMethod('unselect');
           self.$refs.calendar.$emit('refetch-events')
         }).catch(function (reason) {
+          self.$toast.open({
+            message: 'Unable to create appointment',
+            type: 'is-danger',
+            duration: 2000
+          })
           console.log(reason);
         })
       },
@@ -1060,6 +1076,25 @@
     vertical-align: middle;
     display: inline-block;
     line-height: normal;
+  }
+
+  .fc-month-view .fc-content-skeleton, .fc-month-view .fc-day  {
+    cursor: pointer;
+  }
+
+  .fc-timelineWeek-view .fc-time-area .fc-content .fc-widget-content,
+  .fc-timelineDay-view .fc-time-area .fc-content .fc-widget-content {
+    cursor: pointer;
+  }
+
+  .fc-timelineWeek-view .fc-time-area .fc-bgevent-container,
+  .fc-timelineDay-view .fc-time-area .fc-bgevent-container {
+    cursor: not-allowed;
+  }
+
+  .fc-timelineWeek-view .fc-event-container .fc-content,
+  .fc-timelineDay-view .fc-event-container .fc-content {
+    cursor: pointer;
   }
 
   .fc-timelineWeek-view .fc-widget-content .fc-content,

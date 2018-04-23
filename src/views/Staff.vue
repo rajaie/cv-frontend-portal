@@ -155,7 +155,7 @@
           '/user/'+this.selectedUser.id,
           body).then(function(response) {
           self.$toast.open({
-            message: 'Profile updated successfully',
+            message: response.data.message,
             type: 'is-success',
             duration: 2000
           })
@@ -165,7 +165,7 @@
           self.getUserProfiles();
         }).catch(function (err) {
           self.$toast.open({
-            message: 'Unable to update profile',
+            message: err.response.data.message,
             type: 'is-danger',
             duration: 2000
           })
@@ -186,14 +186,14 @@
           return;
         }
 
-        const confirmDelete = confirm("Are you sure you want to delete this service?");
+        const confirmDelete = confirm("Are you sure you want to delete this user?");
         if (!confirmDelete) { return;}
 
         ApiService.delete(
           '/user/'+this.selectedUser.id
         ).then(function(response) {
           self.$toast.open({
-            message: 'Profile deleted successfully',
+            message: response.data.message,
             type: 'is-success',
             duration: 2000
           });
@@ -201,7 +201,7 @@
           self.selectedUser = null;
         }).catch(function (err) {
           self.$toast.open({
-            message: 'Unable to delete profile',
+            message: err.response.data.message,
             type: 'is-danger',
             duration: 2000
           });
@@ -233,7 +233,7 @@
           userInfo
         ).then(function(response) {
           self.$toast.open({
-            message: 'New user created successfully',
+            message: response.data.message,
             type: 'is-success',
             duration: 2000
           });
@@ -241,7 +241,7 @@
           self.newUser = null;
         }).catch(function (err) {
           self.$toast.open({
-            message: 'Unable to create new user',
+            message: err.response.data.message,
             type: 'is-danger',
             duration: 2000
           });

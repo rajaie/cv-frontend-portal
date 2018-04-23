@@ -67,7 +67,7 @@
       }
 
       checkLogin()
-      setInterval(checkLogin, 60000)
+      setInterval(checkLogin, 600000)
     },
     data() {
       return {

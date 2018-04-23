@@ -501,7 +501,7 @@
       },
       filteredServices() {
         return this.services.filter((service) => {
-          const serviceSearchKey = this.serviceBooking.serviceName ? this.serviceBooking.serviceName : ""
+          const serviceSearchKey = (this.serviceBooking && this.serviceBooking.serviceName) ? this.serviceBooking.serviceName : ""
           return service.name
             .toString()
             .toLowerCase()
@@ -712,15 +712,6 @@
      /* dropOne(){
         this.dropOneP = !this.dropOneP;
       },*/
-      filteredServices(services) {
-        return services.filter((service) => {
-          const serviceSearchKey = this.serviceBooking.serviceName ? this.serviceBooking.serviceName : ""
-          return service.name
-            .toString()
-            .toLowerCase()
-            .indexOf(serviceSearchKey.toLowerCase()) >= 0
-        })
-      },
       refetchResources() {
         this.$refs.calendar.fireMethod('refetchResources');
       },

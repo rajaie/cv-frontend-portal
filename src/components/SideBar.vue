@@ -35,7 +35,7 @@
         aside.menu {
           .menu-list li a {
             color: white;
-            padding: 0.75em 1.75em;
+            padding: 0.75em .5em;
             border-radius: 0;
             &:hover {
               color: black;

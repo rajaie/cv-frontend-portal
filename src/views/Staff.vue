@@ -125,7 +125,6 @@
     methods: {
       getUserProfiles() {
         let self = this;
-        console.log("getting profiles");
         ApiService.get('/user', {
             params: {
               populate: "false",
@@ -137,9 +136,7 @@
           }
         ).then(function(response) {
           self.userList = response.data.result;
-        }).catch(function(err) {
-          console.log(err);
-        });
+        })
       },
       selectUser(userId) {
         const user = this.userList.find(u => u.id === userId)
@@ -154,23 +151,21 @@
           'firstName': this.selectedUser.firstName,
           'lastName': this.selectedUser.lastName,
         }
-        ApiService.put(
+        ApiService.patch(
           '/user/'+this.selectedUser.id,
           body).then(function(response) {
           self.$toast.open({
-            message: 'Profile updated successfully',
+            message: response.data.message,
             type: 'is-success',
             duration: 2000
           })
           if (self.$store.state.auth.user.id === self.selectedUser.id) {
-            self.$store.commit("login", response.data.result[0]);
+            self.$store.commit("setUser", response.data.result[0]);
           }
-          console.log("getting profiles");
           self.getUserProfiles();
         }).catch(function (err) {
-          console.log("Error is:" + err);
           self.$toast.open({
-            message: 'Unable to update profile',
+            message: err.response.data.message,
             type: 'is-danger',
             duration: 2000
           })
@@ -191,23 +186,22 @@
           return;
         }
 
-        const confirmDelete = confirm("Are you sure you want to delete this service?");
+        const confirmDelete = confirm("Are you sure you want to delete this user?");
         if (!confirmDelete) { return;}
 
         ApiService.delete(
           '/user/'+this.selectedUser.id
         ).then(function(response) {
           self.$toast.open({
-            message: 'Profile deleted successfully',
+            message: response.data.message,
             type: 'is-success',
             duration: 2000
           });
           self.getUserProfiles();
           self.selectedUser = null;
         }).catch(function (err) {
-          console.log("Error is:" + JSON.stringify(err));
           self.$toast.open({
-            message: 'Unable to delete profile',
+            message: err.response.data.message,
             type: 'is-danger',
             duration: 2000
           });
@@ -239,7 +233,7 @@
           userInfo
         ).then(function(response) {
           self.$toast.open({
-            message: 'New user created successfully',
+            message: response.data.message,
             type: 'is-success',
             duration: 2000
           });
@@ -247,7 +241,7 @@
           self.newUser = null;
         }).catch(function (err) {
           self.$toast.open({
-            message: 'Unable to create new user',
+            message: err.response.data.message,
             type: 'is-danger',
             duration: 2000
           });
@@ -262,7 +256,6 @@
         this.newUser = {'role' : 'practitioner'};
       },
       comparePasswords() {
-        console.log("comparing passwords");
         if (this.newUser.password === this.newUser.passwordConfirmation) {
           this.passwordsMatch = true;
         }

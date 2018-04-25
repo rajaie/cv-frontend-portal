@@ -27,7 +27,6 @@
             </div>
           </nav>
         </div>
-        <div :class=calendarWidthClass>
           <full-calendar
             ref="calendar"
             :event-sources="eventSources"
@@ -36,7 +35,6 @@
             :style="{}"
           >
           </full-calendar>
-        </div>
       </div>
       <!-- **********************************************************
            ******************* SOAP NOTES SECTION *******************
@@ -98,7 +96,9 @@
         <!-- **********************************************************
              ****************** BOOK A SERVICE SECTION **************
              ********************************************************** -->
-        <div v-if="serviceBooking.mode=='calendarSearch'">
+
+        <!-- form when a specific time slot was choosen (clicked) by the practitioner/user -->
+        <div v-if="serviceBooking.mode=='calendarClick'">
           <h2 class="subtitle left-align">New Appointment</h2>
           <a @click="serviceBooking=undefined" class="right-align"><i class="fas fa-chevron-circle-right"></i></a>
           <div class="clear"></div>
@@ -315,7 +315,7 @@
     data() {
       let self = this;
       return {
-        calendarViewName: "",
+
         practitionerFilterSelect: [],
         practitionerFilterView: true,
         services: null,
@@ -340,6 +340,7 @@
             right:"timelineDay,timelineWeek,month,listWeek"
           },
           config: {
+            schedulerLicenseKey: 'GPL-My-Project-Is-Open-Source',
             views : {
               timelineDay: {
                 groupByDateAndResource: true,
@@ -359,39 +360,39 @@
             defaultView: 'timelineDay',
             resourceAreaWidth: "10rem",
             height: 800,
-            //groupByDateAndResource: true,
-            // scrollTime: moment().startOf('hour').format("HH:mm:ss"),
             allDaySlot: false,
             businessHours: {
               dow: [0, 1, 2, 3, 4, 5, 6],
               start: '08:00',
-              end: '20:00'
+              end: '23:00'
             },
             slotDuration: '00:15:00',
-            minTime: '08:00:00',
-            maxTime: '20:00:00',
+            minTime: '00:00:00',
+            maxTime: '23:59:99',
             // Callbacks
-            // event handler for when appointment is clicked in the calendar
+            // color code odd and even days in the calendar
             dayRender(date, cell) {
-              console.log('date = ' + date);
-              console.log('moment(0) : ' + moment(0));
               let numDaysSinceEpoch = date.diff(moment(0), 'days');
-              console.log("numDaysSinceEpoch= " + numDaysSinceEpoch);
-              console.log("numDaysSinceEpoch % 2 = " + numDaysSinceEpoch % 2);
               if (numDaysSinceEpoch % 2 == 0) {
                 cell.css("background-color", "#FDFEFE");
               }
               else {
                 cell.css("background-color", "#F8FCFC");
               }
-              //cell.css("background-color", "red");
-
             },
+            // callback for when the user clicks on a day in the month view
             dayClick(date, event, view, resource){
               if (view.name !== "month") {
                 return;
               }
-              if (date.isBefore(moment())) {
+              let timezone = event.timezone ? event.timezone: "America/Toronto";
+              let tzDate = date.clone();
+              tzDate.tz(timezone, true);
+
+              let now = moment.tz(timezone);
+              console.log('tzDate = ' + tzDate.format());
+              console.log('now = ' + now.format());
+              if (tzDate.isBefore(now.startOf('day'))) {
                 self.$toast.open({
                   message: 'Cannot create appointment in the past',
                   type: 'is-warning',
@@ -400,13 +401,23 @@
                 return;
               }
               self.serviceBooking = {
-                date: moment.tz(date, event.timezone).toDate(),
+                date: tzDate.toDate(),
               };
               self.selectedAppointment = null;
             },
+            // callback for when the user clicks on a time in day or week view
             select(start, end, event, view, resource){
-              console.log("select called");
-              if (start.isBefore(moment())) {
+              console.log('start = ' + start.format());
+
+              let timezone = event.timezone ? event.timezone: "America/Toronto";
+              let tzStart = start.clone();
+              tzStart.tz(timezone, true);
+              console.log('tzStart = ' + tzStart.format());
+              console.log('moment() = ' + moment().format());
+              let now = moment.tz(timezone);
+              console.log('moment(timezone) = ' + now.format());
+
+              if (tzStart.isBefore(now)) {
                 self.$toast.open({
                   message: 'Cannot create appointment in the past',
                   type: 'is-warning',
@@ -423,25 +434,25 @@
                 practitionerName: practitioner.fullName,
                 time: moment.tz(start, event.timezone).format("hh:mm A"),
                 date: moment.tz(start, event.timezone).toDate(),
-                mode: 'calendarSearch',
+                mode: 'calendarClick',
               };
               self.selectedAppointment = null;
-              //console.log("self.serviceBooking = " + JSON.stringify(self.serviceBooking));
             },
+            // event handler for when appointment is clicked in the calendar
             eventClick(event, jsEvent, view) {
               let aptCpy = Object.assign({}, event);
               delete aptCpy.source // get rid of this, causes a circular reference error when trying to JSON.stringify
               self.selectedAppointment = aptCpy;
               self.serviceBooking = null;
             },
-            viewRender(view, element) {
-              self.calendarViewName = view.name;
-            },
+
+            // callback to get resources (practitioners)
             resources: function(callback, start, end, timezone) {
               ApiService.get('/user').then(function(res) {
                 let resourceArray = [];
                 let filteredPractitioners = [];
-                if (typeof self !== 'undefined') { filteredPractitioners = res.data.result.filter( function(practitioner) {
+                if (typeof self !== 'undefined') {
+                  filteredPractitioners = res.data.result.filter( function(practitioner) {
                       return (self.practitionerFilterSelect.findIndex(
                         function (filteredPractitioner) {
                           return practitioner.id === filteredPractitioner;
@@ -451,7 +462,7 @@
                   );
                 }
                 else {
-                  filteredPractitioners = [self.$store.state.auth.user.id];
+                  filteredPractitioners = [self.$store.state.auth.user];
                 }
                 filteredPractitioners.forEach(function (practitioner) {
                   resourceArray.push(
@@ -473,18 +484,6 @@
       }
     },
     computed: {
-      calendarWidthClass() {
-        return "bam";
-        let numDays = 1;
-        if (this.calendarViewName == "timelineWeek") {
-          numDays = 7;
-        }
-
-        let ratio = this.practitionerFilterSelect.length*numDays/14;
-        let widthMultiplier = ratio <= 10 ? Math.ceil(ratio) : 10;
-
-        return "calendar-" + widthMultiplier + "x";
-      },
       breakDurations() {
         // TODO: get practitioner's availabilities, and set max break length to their longest working day's hours.
         const CHUNK_SIZE_MINUTES = 15;
@@ -560,27 +559,55 @@
               start =  start.format("YYYY-MM-DD HH:mm:ss");
               end =  end.format("YYYY-MM-DD HH:mm:ss");
 
-              ApiService.get('/appointment', {
-                  params: {
-                    where: {
-                      startDateTime: {
-                        '>=': start
-                      },
-                      endDateTime: {
-                        '<=': end
-                      },
-                      status: [1,2,0],
-                      // practitioner: self.$store.state.auth.user.id,
-                    },
-                    sort: 'startDateTime ASC',
-                    limit: 100
-                  }
+              // display events for only practitioners that are selected by user
+              ApiService.get('/user').then(function(res) {
+                let resourceArray = [];
+                let filteredPractitioners = [];
+                if (typeof self !== 'undefined') {
+                  filteredPractitioners = res.data.result.filter(function (practitioner) {
+                      return (self.practitionerFilterSelect.findIndex(
+                        function (filteredPractitioner) {
+                          return practitioner.id === filteredPractitioner;
+                        }
+                      ) > -1);
+                    }
+                  );
                 }
-              )
-                .then(res => {
-                  let formattedAppts = []
-                  for (let j = 0; j < self.practitioners.length; ++j) {
-                    let practitioner = self.practitioners[j];
+                else {
+                  filteredPractitioners = [self.$store.state.auth.user];
+                }
+                filteredPractitioners.forEach(function (practitioner) {
+                  resourceArray.push(
+                    {
+                      id: practitioner.id,
+                      title: practitioner.firstName + ' ' + practitioner.lastName,
+                    }
+                  );
+                });
+
+                console.log("filteredPractitioners.length = " + filteredPractitioners.length);
+                let filteredPractitionersIds = filteredPractitioners.map(practitioner => practitioner.id);
+                ApiService.get('/appointment', {
+                    params: {
+                      where: {
+                        startDateTime: {
+                          '>=': start
+                        },
+                        endDateTime: {
+                          '<=': end
+                        },
+                        practitioner: filteredPractitionersIds,
+                        status: [1, 2, 0],
+                        // practitioner: self.$store.state.auth.user.id,
+                      },
+                      sort: 'startDateTime ASC',
+                      limit: 100
+                    }
+                  }
+                ).then(res => {
+                  console.log("got the following appointments : " + JSON.stringify(res));
+                  let formattedAppts = [];
+                  filteredPractitioners.forEach(function (practitioner) {
                     // Full Calendar identifies Sunday as day 0 while moment treats Sunday as 7
                     // All other days are the same between the two
                     let practitionerAvailabilities = practitioner.availabilities.map(function (availability) {
@@ -589,13 +616,14 @@
                       }
                       return availability;
                     });
-                    for (let i = 0; i < practitionerAvailabilities.length; ++i) {
-                      let availabilityDay = practitionerAvailabilities[i];
-                      //console.log('availabilityDay = ' + JSON.stringify(availabilityDay));
+
+                    // create events to grey out the timing that a practitoner is unavailable
+                    practitionerAvailabilities.forEach(function (availabilityDay) {
+
                       formattedAppts.push(
                         {
                           title: 'not available',
-                          dow : [availabilityDay.day],
+                          dow: [availabilityDay.day],
                           start: '00:00',
                           end: moment(availabilityDay.from, "hh:mm A", true).format('HH:mm'),
                           resourceId: practitioner.id,
@@ -606,7 +634,7 @@
                       formattedAppts.push(
                         {
                           title: 'not available',
-                          dow : [availabilityDay.day],
+                          dow: [availabilityDay.day],
                           start: moment(availabilityDay.to, "hh:mm A", true).format('HH:mm'),
                           end: '23:59',
                           resourceId: practitioner.id,
@@ -614,11 +642,12 @@
                           backgroundColor: '#808080',
                         }
                       );
-                    }
-                    let daysWithoutAvailability = _.range(0,7).filter((day) => {
-                      //console.log("working on day: "+ day);
-                      return (!practitionerAvailabilities.find(function(availabilityDay) {
-                        //console.log('-- found availability.day =' + availabilityDay.day);
+                    });
+
+                    // if the practitioner hasn't provided availability for a specific day of the week,
+                    // then that means that they are not available for that day
+                    let daysWithoutAvailability = _.range(0, 7).filter((day) => {
+                      return (!practitionerAvailabilities.find(function (availabilityDay) {
                         return availabilityDay.day === day;
                       }));
                     });
@@ -628,7 +657,7 @@
                       formattedAppts.push(
                         {
                           title: 'not available',
-                          dow : [day],
+                          dow: [day],
                           start: '00:00',
                           end: '23:59',
                           resourceId: practitioner.id,
@@ -637,18 +666,17 @@
                         }
                       );
                     });
-                  }
-
-                  res.data.result.forEach(function(appointment) {
+                  });
+                  res.data.result.forEach(function (appointment) {
                     let event = {
-                      title: appointment.serviceName ? appointment.serviceName : "Break",
+                      title: appointment.patientName + ':' + appointment.serviceName ? appointment.serviceName : "Break",
                       start: moment.tz(appointment.startDateTime, appointment.timezone).format(),
                       end: moment.tz(appointment.endDateTime, appointment.timezone).format(),
-                      resourceId : appointment.practitioner.id,
+                      resourceId: appointment.practitioner.id,
                     }
 
                     appointment.startDateTime = moment.tz(appointment.startDateTime, appointment.timezone),
-                    appointment.endDateTime = moment.tz(appointment.endDateTime, appointment.timezone);
+                      appointment.endDateTime = moment.tz(appointment.endDateTime, appointment.timezone);
                     appointment.isBookingCancellable = moment.tz(appointment.startDateTime, appointment.timezone)
                       .isAfter(moment.tz(appointment.timezone))
 
@@ -665,7 +693,8 @@
                   //console.log('formattedAppts = ' + JSON.stringify(formattedAppts));
                   callback(formattedAppts)
                 })
-                .catch(err => console.log(err))
+                  .catch(err => console.log(err))
+              });
             },
           }
         ]
@@ -678,23 +707,34 @@
       this.getPatients()
       this.getPractitioners()
       this.getSoapNoteTemplates()
+
+      // logged in user is selected by default
       this.practitionerFilterSelect = []
       this.practitionerFilterSelect.push(this.$store.state.auth.user.id);
     },
     watch: {
       'serviceBooking.date': function (newDate, oldDate) {
-        const serviceBooking = this.serviceBooking
-        //console.log(newDate);
-        //console.log(oldDate);
-
+        const serviceBooking = this.serviceBooking;
         if (serviceBooking && serviceBooking.practitioner && serviceBooking.service) {
           this.findEmptySlots(moment(newDate).format('YYYY-MM-DD'));
+        }
+      },
+      'serviceBooking.practitioner': function (newPractitioner, oldPractitioner) {
+        const serviceBooking = this.serviceBooking;
+        if (serviceBooking && serviceBooking.practitioner && serviceBooking.service && serviceBooking.date) {
+          this.findEmptySlots(moment(serviceBooking.date).format('YYYY-MM-DD'));
+        }
+      },
+      'serviceBooking.service': function (newService, oldService) {
+        const serviceBooking = this.serviceBooking;
+        if (serviceBooking && serviceBooking.practitioner && serviceBooking.service && serviceBooking.date) {
+          this.findEmptySlots(moment(serviceBooking.date).format('YYYY-MM-DD'));
         }
       },
       breakBooking: {
         handler: function (newBreakBooking, oldBreakBooking) {
           if (newBreakBooking && newBreakBooking.date && newBreakBooking.duration) {
-            console.log("Get available break slots.")
+            //console.log("Get available break slots.")
             this.findBreakSlots(moment(newBreakBooking.date).format('YYYY-MM-DD'));
           }
         },
@@ -702,19 +742,13 @@
       },
       practitionerFilterSelect: {
         handler: function (newPractitionerFilterSelect, oldPractitionerFilterSelect) {
-          //console.log("refetching resources")
-          this.refetchResources();
+          this.$refs.calendar.fireMethod('refetchResources');
+          this.$refs.calendar.$emit('refetch-events')
         },
         deep: true
       }
     },
     methods: {
-     /* dropOne(){
-        this.dropOneP = !this.dropOneP;
-      },*/
-      refetchResources() {
-        this.$refs.calendar.fireMethod('refetchResources');
-      },
       getResources() {
         let self = this;
         self.resources = [];
@@ -736,11 +770,7 @@
       },
       selectService(service) {
         if(!service) return
-
         this.serviceBooking.service = service
-        if (this.serviceBooking.practitionerId && this.serviceBooking.date) {
-          this.findEmptySlots(moment(this.serviceBooking.date).format('YYYY-MM-DD'));
-        }
       },
       selectPractitioner(practitioner) {
         if(!practitioner)  {
@@ -796,7 +826,7 @@
       },
       startAppointmentDraft() {
         console.log("Starting new draft appointment")
-        this.serviceBooking = {};
+        this.serviceBooking = {mode: 'formSearch'};
         this.selectedAppointment = null;
       },
       async createBreak(booking) {
@@ -826,7 +856,6 @@
         };
 
         ApiService.post(`/appointment`, bodyParams).then(function (response) {
-          console.log(response.data.message);
           self.serviceBooking = null
           // TODO: create function which returns an initialBreakData()
           self.breakBooking = {
@@ -913,7 +942,6 @@
           return
         }
 
-
         const startDate = moment(self.serviceBooking.date).format("YYYY-MM-DD");
         const startTime = self.serviceBooking.time;
         const startDateTime = `${startDate} ${startTime}`
@@ -926,7 +954,7 @@
         };
 
         ApiService.post(`/appointment`, bodyParams).then(function (response) {
-          console.log(response.data.message);
+          //console.log(response.data.message);
           self.serviceBooking = null
 
           let appointment = response.data.result;
@@ -1053,10 +1081,10 @@
   @import 'https://fullcalendar.io/releases/fullcalendar/3.9.0/fullcalendar.min.css';
   @import 'https://fullcalendar.io/releases/fullcalendar-scheduler/1.9.4/scheduler.min.css';
   .fc-timelineWeek-view .fc-timeline-event, .fc-timelineDay-view .fc-timeline-event {
-    height: 58px;
+    height: 57px;
     margin-bottom: 1px;
     margin-top: 1px;
-    border: thick black !important;
+    border-color: black !important;
     border-style: solid;
     padding-bottom: 0px;
     padding-top: 0px;

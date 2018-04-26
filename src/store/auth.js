@@ -26,17 +26,20 @@ export default {
     logout(state) {
       delete localStorage.token
       delete localStorage.user
+      delete localStorage.clinic
+
       delete ApiService.defaults.headers['Authorization']
 
       state.isAuthenticated = false;
       state.user = {};
+      state.clinic = {};
     },
     setUser(state, user) {
       localStorage.user = JSON.stringify(user)
       state.user = user;
     },
     setClinic(state, clinic) {
-      localStorage.user = JSON.stringify(clinic)
+      localStorage.clinic = JSON.stringify(clinic)
       state.clinic = clinic;
     }
   },

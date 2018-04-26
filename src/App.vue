@@ -66,7 +66,8 @@
         this.$store.dispatch("getClinic");
       }
 
-      setInterval(checkLogin, 60000)
+      checkLogin()
+      setInterval(checkLogin, 600000)
     },
     data() {
       return {

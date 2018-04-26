@@ -374,12 +374,9 @@
         return durations
       },
       filteredServices() {
+        const serviceSearchKey = this.serviceBooking.serviceName ? this.serviceBooking.serviceName : ""
         return this.services.filter((service) => {
-          const serviceSearchKey = this.serviceBooking.serviceName ? this.serviceBooking.serviceName : ""
-          return service.name
-            .toString()
-            .toLowerCase()
-            .indexOf(serviceSearchKey.toLowerCase()) >= 0
+          return service.name.toString().toLowerCase().indexOf(serviceSearchKey.toLowerCase()) >= 0
         })
       },
       filteredPractitioners() {
@@ -392,12 +389,9 @@
         })
       },
       filteredPatients() {
+        const patientSearchKey = this.serviceBooking.patientName ? this.serviceBooking.patientName : ""
         return this.formattedPatients.filter((patient) => {
-          const patientSearchKey = this.serviceBooking.patientName ? this.serviceBooking.patientName : ""
-          return patient.fullName
-            .toString()
-            .toLowerCase()
-            .indexOf(patientSearchKey.toLowerCase()) >= 0
+          return patient.fullName.toString().toLowerCase().indexOf(patientSearchKey.toLowerCase()) >= 0
         })
       },
       formattedPatients() {

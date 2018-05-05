@@ -45,7 +45,7 @@
     data() {
       return {
         password: "",
-        username: "practitioner_1_0",
+        username: "",
         user: undefined,
         patients: undefined,
         error: undefined,

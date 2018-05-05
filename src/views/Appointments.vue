@@ -236,7 +236,6 @@
   import "fullcalendar-scheduler";
   import "fullcalendar/dist/fullcalendar.min.css";
   import "fullcalendar-scheduler/dist/scheduler.min.css";
-  import config from "../config/config";
 
   // TODO: for the new appointment date picker, set unselectable-days-of-week (https://buefy.github.io/#/documentation/datepicker) to the days where the practitioner is not working
   // TODO: allow booking appointments for another practitioner
